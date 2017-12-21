@@ -430,6 +430,10 @@ gameover:
     ldx #$ff
     ldy #$ff
 gameoverLoop:
+    nop
+    nop
+    nop
+    nop
     dex
     bne gameoverLoop
     dey
