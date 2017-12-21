@@ -26,6 +26,7 @@ irqn:
 	BYTE
 
 ; Direction of the snake (2,4,6,8 as down,left,right,up)
+; 5 means `pause`
 direction:
     BYTE
 
@@ -225,11 +226,17 @@ keybCheckD:
     jmp keybEndCheck
 keybCheckW:
     cmp #$57
-    bne keybEndCheck
+    bne keybCheckP
     lda direction
     cmp #2
     beq keybEndCheck
     lda #8
+    sta direction
+    jmp keybEndCheck
+keybCheckP:
+    cmp #$50
+    bne keybEndCheck
+    lda #5
     sta direction
     jmp keybEndCheck
 keybEndCheck:
@@ -256,10 +263,14 @@ dirCheck6:
     stx snakeX
 dirCheck8:
     cmp #8
-    bne dirEndCheck
+    bne dirCheck5
     ldy snakeY
     dey
     sty snakeY
+dirCheck5:
+    cmp #5
+    bne dirEndCheck
+    jmp skipPauseTests
 dirEndCheck:
 
     ; Check screen boundaries overflow
@@ -385,6 +396,8 @@ checkEndSelfEat:
     jsr calcTileMem
     lda #$20            ; just put a space to erase snake tail tile
     sta (tileMem),y
+
+skipPauseTests:
 
 irqalways:
     ; Things that must be done every interrupt (50Hz)
