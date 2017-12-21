@@ -400,9 +400,16 @@ gameover:
     sta printStatusString + 1
     jsr printStatus
     jsr sidtune
-gameoverLoop:
+
     sei
-    jmp gameoverLoop
+    ldx #$ff
+    ldy #$ff
+gameoverLoop:
+    dex
+    bne gameoverLoop
+    dey
+    bne gameoverLoop
+    jmp 64738
 
 ; Subroutines
 ; ----------------------------------------------------------------------
