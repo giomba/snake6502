@@ -69,7 +69,7 @@ foodColor:
     BYTE #15
 
 gameoverString:
-    BYTE "GAMEOVER"
+    BYTE "GAME IS OVER"
     BYTE #0
 
 ; List
@@ -534,6 +534,10 @@ printStatus:
 printStatusLoop:
     lda (printStatusString),y
     beq printStatusEnd
+    cmp #$20
+    bne printStatusSkipSpace
+    lda #$60
+printStatusSkipSpace:
     sec
     sbc #$40    ; convert from standard ASCII to Commodore screen code
     sta $413,y
