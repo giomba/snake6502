@@ -23,17 +23,17 @@ sidtune:
 ; Number of interrupt
 ; Used as counter to be decremented to do some things less frequently
 irqn:
-	BYTE #4
+	BYTE
 
 ; Direction of the snake (2,4,6,8 as down,left,right,up)
 direction:
-    BYTE #6
+    BYTE
 
 ; Snake head coordinates in video memory
 snakeX:
-    BYTE #19
+    BYTE
 snakeY:
-    BYTE #12
+    BYTE
 
 ; Parameters for calcTileMem
 calcTileX:
@@ -43,9 +43,9 @@ calcTileY:
 
 ; List start and length
 listStart:
-    BYTE #5
+    BYTE
 length:
-    BYTE #5
+    BYTE
 
 ; Random value
 random:
@@ -76,11 +76,9 @@ gameoverString:
 ; ----------------------------------------------------------------------
 . = $2200
 listX:
-    BYTE #19
 
 . = $2300
 listY:
-    BYTE #12
 
 ; ENTRY OF PROGRAM
 ; ----------------------------------------------------------------------
@@ -150,12 +148,32 @@ upperbarLoop:
     ; Enable interrupts
     cli
 
+    jsr fullreset
+
     ; Endless loop, show that there is enogh time after the interrupt
 endless:
     ldx $400
     inx
     stx $400
     jmp endless
+    brk
+
+; Full reset
+; ----------------------------------------------------------------------
+fullreset:
+    lda #4
+    sta irqn
+    lda #6
+    sta direction
+    lda #19
+    sta snakeX
+    lda #12
+    sta snakeY
+    lda #5
+    sta listStart
+    lda #5
+    sta length
+    rts
 
 ; Interrupt Handler
 ; ----------------------------------------------------------------------
