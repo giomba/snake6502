@@ -96,17 +96,11 @@ start:
     ; Upper bar
     ldx #39
 upperbarLoop:
-    lda #6
-    sta $d800,x
-    lda #160
-    sta $400,x
-    dex
-    bne upperbarLoop
-
-    ; Scoreboard
     lda #7
-    sta $d810
-    sta $d811
+    sta $d800,x
+    dex
+    cpx #$ff
+    bne upperbarLoop
 
     ; Disable all interrupts
     sei
