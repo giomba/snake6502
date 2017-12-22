@@ -96,9 +96,11 @@ start:
     sta $d020   ; overscan
     lda #9
     sta $d021   ; center
-    ; Upper bar
+    ; Upper bar -- fill with reversed spaces, color yellow
     ldx #39
 upperbarLoop:
+    lda #$a0    ; reversed color space
+    sta $400,x
     lda #7
     sta $d800,x
     dex
@@ -560,12 +562,14 @@ printDigit:
     bcs printDigitL     ; if it is not a decimal digit, then go to printDigitL
     clc                 ; it is a decimal digit! Just add `0` (48)
     adc #48
+    ora #$80            ; reverse color
     rts
 printDigitL:            ; it is not a decimal digit, then...
     sec
     sbc #10             ; take away 10
     clc
     adc #1              ; add 1, so you obtain something in [A-F]
+    ora #$80            ; reverse color
     rts
 
 ; Print null-terminated string on status bar
@@ -581,6 +585,7 @@ printStatusLoop:
 printStatusSkipSpace:
     sec
     sbc #$40    ; convert from standard ASCII to Commodore screen code
+    ora #$80    ; reverse color
     sta $413,y
     iny
     jmp printStatusLoop
