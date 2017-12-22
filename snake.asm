@@ -342,11 +342,21 @@ genFood:
     sec                 ; if value is > 18, then subtract 18; now it
     sbc #18             ; surely is less than 18
 foodNoMod:
+    cmp #0
     bne foodNoLow       ; if it is 0, then set 1 (avoid first line)
     lda #1
 foodNoLow:
     sta calcTileY       ; use this new value as tile Y-coordinate
-    jsr calcTileMem     ; calc its address in memory
+    ; Now I have X and Y coordinate for food stored in calcTileX, calcTileY
+    ; and I must check it is not the location that I am going to overwrite
+    ; with the head in draw snake head...
+    cmp snakeY
+    bne foodOK
+    lda snakeX
+    cmp snakeX
+    beq genFood
+foodOK:
+    jsr calcTileMem     ; calc food address in memory
     lda (tileMem),y     ; check if memory is empty
     cmp #$20            ; is there a space?
     bne genFood         ; if not, must generate another number
