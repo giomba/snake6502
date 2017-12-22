@@ -8,7 +8,9 @@
 tileMem = $a0
 printStatusString = $a3
 
-    org $1000
+    org $801
+. = $801
+    BYTE #$0b,#$08,#$0a,#$00,#$9e,#$39,#$32,#$31,#$36,#$00,#$00,#$00
 
 ; SID tune (previously properly cleaned, see HVSC)
 ; ----------------------------------------------------------------------
