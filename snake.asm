@@ -54,6 +54,10 @@ length:
 random:
     BYTE
 
+; Status (0 intro playing, 1 game running)
+status:
+    BYTE
+
 ; Costants
 ; ----------------------------------------------------------------------
 
@@ -149,13 +153,25 @@ upperbarLoop:
 
     jsr fullreset
 
-    ; Endless loop, show that there is enogh time after the interrupt
+    ; Simple intro
+intro:
+    ldx 53280
+    inx
+    stx 53280
+
+    jsr $ffe4
+    cmp #$20
+    bne intro
+
+    lda #1
+    sta status
+
 endless:
+    ; Endless loop, show that there is enogh time after the interrupt
     ldx $400
     inx
     stx $400
     jmp endless
-    brk
 
 ; Full reset
 ; ----------------------------------------------------------------------
@@ -172,6 +188,8 @@ fullreset:
     sta listStart
     lda #5
     sta length
+    lda #0
+    sta status
     rts
 
 ; Interrupt Handler
@@ -180,6 +198,13 @@ irq:
     ; Acknoweledge IRQ
     dec $d019
 
+    ; Check status
+    lda status
+    cmp #1
+    beq doGame      ; if status is 1, must do game
+    jmp irqalways   ; else simply do every-interrupt tasks (always-do)
+
+doGame:
     ; Check counter
     ldx irqn
     dex
