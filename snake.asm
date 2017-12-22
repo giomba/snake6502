@@ -310,7 +310,9 @@ overEndCheck:
 
     ldy #0
 
-    ; Check for food eat / wall hit (actually doing food check only)
+    ; Check for food eat / wall hit / self-eat
+    ; -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+    ; --- Food eat ---
     lda snakeX          ; calc head location in memory
     sta calcTileX
     lda snakeY
@@ -318,7 +320,7 @@ overEndCheck:
     jsr calcTileMem
     lda (tileMem),y     ; read content of head memory location
     cmp foodTile
-    bne checkSelfEat    ; if memory does not contain food, then skip to next test...
+    bne checkSelfEat    ; if memory does not contain food, then skip to self-eat test...
     ldx length          ; else, increment snake length,
     inx
     stx length
@@ -361,11 +363,11 @@ foodNoLow:
     jmp checkEndSelfEat
 checkEndFood:
 
+    ; --- Self eat ---
 checkSelfEat:
     cmp snakeTile
     bne checkEndSelfEat
     jmp gameover
-
 checkEndSelfEat:
 
     ; Draw snake head
