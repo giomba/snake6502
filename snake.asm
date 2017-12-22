@@ -320,48 +320,69 @@ overEndCheck:
     jsr calcTileMem
     lda (tileMem),y     ; read content of head memory location
     cmp foodTile
-    bne checkSelfEat    ; if memory does not contain food, then skip to self-eat test...
+    beq foodEaten       ; if memory does contain food, then perform foodEaten actions,
+    jmp checkSelfEat    ; else just loooong jump to test if I ate myself
+foodEaten:
     ldx length          ; else, increment snake length,
     inx
     stx length
 genFood:
-    ldx random          ; increment random value
+    ldx random
     inx
     stx random
+
     txa
-    sta calcTileX       ; use it as tile X-coordinate
-    lsr                 ; divide it by 8; maximum expected is 32 (256/8)
-    lsr
-    lsr
-    cmp #18             ; test if it is still > 18
-    bcc foodNoMod       ; value must be < 18,
-                        ; because it is the highest value v
-                        ; for which v * 40 + 256 < 1000
-                        ; this ensures that piece if food will be placed
-                        ; within visible screen
-    sec                 ; if value is > 18, then subtract 18; now it
-    sbc #18             ; surely is less than 18
-foodNoMod:
-    cmp #0
-    bne foodNoLow       ; if it is 0, then set 1 (avoid first line)
-    lda #1
-foodNoLow:
-    sta calcTileY       ; use this new value as tile Y-coordinate
+genFoodX:               ; calculate `random` modulo `screenW`
+    sec
+    sbc screenW
+    cmp screenW
+    bcs genFoodX
+    sta calcTileX
+
+    txa
+genFoodY:               ; calculate `random` modulo 22 (22 = screenH - 1)
+    sec
+    sbc #22
+    cmp #22
+    bcs genFoodY
+    clc                 ; add 1 because 1st line can not be used
+    adc #1
+    sta calcTileY
+
     ; Now I have X and Y coordinate for food stored in calcTileX, calcTileY
     ; and I must check it is not the location that I am going to overwrite
     ; with the head in draw snake head...
-    cmp snakeY
-    bne foodOK
-    lda snakeX
+    lda calcTileX
     cmp snakeX
+    bne foodOK
+    lda calcTileY
+    cmp snakeY
     beq genFood
 foodOK:
+    ; debug -- print choosen X,Y for food
+    ldy #$18
+    lda calcTileX
+    jsr printByte
+    ldy #$1b
+    lda calcTileY
+    jsr printByte
+
+    ; debug -- print snake head X,Y
+    ldy #$1f
+    lda snakeX
+    jsr printByte
+    ldy #$22
+    lda snakeY
+    jsr printByte
+
+    ldy #0
     jsr calcTileMem     ; calc food address in memory
     lda (tileMem),y     ; check if memory is empty
     cmp #$20            ; is there a space?
     bne genFood         ; if not, must generate another number
     lda foodTile        ; else, just put that fucking piece of food there
     sta (tileMem),y
+
     lda #$d4
     clc
     adc tileMem + 1
@@ -369,7 +390,9 @@ foodOK:
     lda foodColor
     sta (tileMem),y
 
-    jsr printScore      ; print score
+    ldy #$10
+    lda length
+    jsr printByte      ; print score
     jmp checkEndSelfEat
 checkEndFood:
 
@@ -381,6 +404,7 @@ checkSelfEat:
 checkEndSelfEat:
 
     ; Draw snake head
+    ldy #0
     lda snakeX          ; calc char address in video memory, and put snakeTile
     sta calcTileX
     lda snakeY
@@ -422,6 +446,11 @@ irqalways:
     ldx random
     inx
     stx random
+
+    ; debug -- print current random value
+    ldy #$14
+    lda random
+    jsr printByte
 
     ; Go to original system routine
     jmp $ea31
@@ -501,17 +530,11 @@ calcTileEnd:            ; now multiplication is ended, so add X
 
     rts
 
-; Print score
-printScore:
-    ; Push registers on stack (save)
-    pha
-    txa
-    pha
-    tya
-    pha
-
-    ; Take length in A and copy also in X
-    lda length
+; Print a byte in hexadecimal
+; A input register for byte to print
+; Y input register for printing colum (on first line)
+printByte:
+    ; Copy parameter also in X
     tax
 
     lsr ; Take most significant nibble
@@ -519,19 +542,12 @@ printScore:
     lsr
     lsr
     jsr printDigit
-    sta $410        ; print msb char at $410
+    sta $400,y      ; print msb char
 
     txa             ; Take least significant nibble (use previous copy)
     and #$0f
     jsr printDigit
-    sta $411        ; print lsb char at $411
-
-    ; Pull registers from stack (restore)
-    pla
-    tay
-    pla
-    tax
-    pla
+    sta $401,y       ; print lsb char
 
     rts
 
