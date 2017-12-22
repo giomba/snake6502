@@ -476,11 +476,6 @@ irqalways:
     inx
     stx random
 
-    ; debug -- print current random value
-    ldy #$14
-    lda random
-    jsr printByte
-
     ; Go to original system routine
     jmp $ea31
 
