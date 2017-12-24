@@ -103,7 +103,10 @@ intro1string:
     BYTE #0
 intro2string:
     BYTE "RETROFFICINA.GLGPROGRAMS.IT"
-    BYTE 0
+    BYTE #0
+intro3string:
+    BYTE "(C) 2018"
+    BYTE #0
 colorshade:
     BYTE    #11,#11,#11,#11,#11,#12,#12,#12,#12,#12,#5,#5,#5
     BYTE    #13,#13,#13,#13,#7,#7,#7,#7,#7,#7
@@ -169,8 +172,12 @@ start:
 intro0running:
     jsr $ffe4
     cmp #$20
+    beq intro0end
+    cmp #$51
     bne intro0running
+    jmp $fce2
 
+intro0end:
     ; Set init variables of the game
     jsr fullreset
     ; Set status as game playing
@@ -276,6 +283,16 @@ introresetColorShade
     lda #>intro2string
     sta printIntroString + 1
     lda #$26
+    sta introScreenStart
+    lda #$07
+    sta introScreenStart + 1
+    jsr printIntro
+
+    lda #<intro3string
+    sta printIntroString
+    lda #>intro3string
+    sta printIntroString + 1
+    lda #$58
     sta introScreenStart
     lda #$07
     sta introScreenStart + 1
