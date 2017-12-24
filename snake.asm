@@ -107,7 +107,7 @@ intro2string:
 intro3string:
     BYTE "(C) 2018"
     BYTE #0
-colorshade:
+colorshade: ; a shade from dark-gray to bright yellow, and vice-versa (40 columns)
     BYTE    #11,#11,#11,#11,#11,#12,#12,#12,#12,#12,#5,#5,#5
     BYTE    #13,#13,#13,#13,#7,#7,#7,#7,#7,#7
     BYTE    #13,#13,#13,#13,#5,#5,#5,#12,#12,#12,#12,#12,#11,#11,#11,#11,#11
@@ -167,16 +167,18 @@ start:
     ; Enable interrupts
     cli
 
+    ; Reset screen (and other parameters) to play intro
     jsr introreset
 
-intro0running:
-    jsr $ffe4
-    cmp #$20
-    beq intro0end
-    cmp #$51
-    bne intro0running
-    jmp $fce2
+intro0running:              ; Cycle here until SPACE or `Q` is pressed
+    jsr $ffe4               ; GETIN
+    cmp #$20                ; Is it SPACE?
+    beq intro0end           ; if yes, go to intro0end and start game (see)
+    cmp #$51                ; Is it Q?
+    bne intro0running       ; If not, keep looping here,
+    jmp $fce2               ; else, reset the computer
 
+    ; Intro is finished, now it's time to start the proper game
 intro0end:
     ; Set init variables of the game
     jsr fullreset
@@ -185,19 +187,15 @@ intro0end:
     sta status
 
 endless:
-    ; Endless loop, show that there is enough time after the interrupt
-    ldx $400
-    inx
-    stx $400
-
+    ; Loop waiting for gameover
     lda status
-    cmp #3
-    bne endless
+    cmp #3          ; is status equal to 3 (gameover) ?
+    bne endless     ; if not, just wait looping here, else...
 
-    jsr introreset
+    jsr introreset  ; reset variables for intro
     lda #0
-    sta status
-    jmp intro0running
+    sta status      ; put machine into 0 status (play intro)
+    jmp intro0running   ; and go there waiting for keypress
 
 ; Full game reset
 ; ----------------------------------------------------------------------
@@ -234,17 +232,17 @@ upperbarLoop:
     lda foodTile
     sta $500        ; Put first piece of food
     lda #4
-    sta irqn
+    sta irqn        ; Initialize interrupt divider
     lda #6
-    sta direction
+    sta direction   ; Snake must go right
     lda #19
-    sta snakeX
+    sta snakeX      ; Snake is at screen center width...
     lda #12
-    sta snakeY
+    sta snakeY      ; ... and height
     lda #5
-    sta listStart
+    sta listStart   ; Beginning of snake tiles list
     lda #5
-    sta length
+    sta length      ; Length of the list
 
     rts
 
@@ -263,11 +261,14 @@ introresetCLS:
     cpx #$ff
     bne introresetCLS
 
+    ; Copy shade colors from costant table to color RAM for 2nd and 4th
+    ; line of text. Soon there will be some text bouncing on these
+    ; lines
     ldx #39
 introresetColorShade
     lda colorshade,x
-    sta $d828,x
-    sta $d878,x
+    sta $d828,x     ; 2nd line
+    sta $d878,x     ; 4th line
     dex
     cpx #$ff
     bne introresetColorShade
@@ -278,19 +279,21 @@ introresetColorShade
     lda #0
     sta $d021   ; center
 
-    lda #<intro2string
-    sta printIntroString
-    lda #>intro2string
-    sta printIntroString + 1
-    lda #$26
-    sta introScreenStart
-    lda #$07
-    sta introScreenStart + 1
-    jsr printIntro
+    ; Print website
+    lda #<intro2string          ; lsb of string address
+    sta printIntroString        ; put into lsb of source pointer
+    lda #>intro2string          ; do the same for msb of string address
+    sta printIntroString + 1    ; put into msb of source pointer
+    lda #$26                    ; this is lsb of address of 20th line
+    sta introScreenStart        ; put into lsb of dest pointer
+    lda #$07                    ; do the same for msb of adress of 20th line
+    sta introScreenStart + 1    ; put into msb of dest pointer
+    jsr printIntro              ; print
 
-    lda #<intro3string
-    sta printIntroString
-    lda #>intro3string
+    ; Print Copyright
+    lda #<intro3string          ; the assembly is the same as above,
+    sta printIntroString        ; just change string to be printed
+    lda #>intro3string          ; and line (21th line)
     sta printIntroString + 1
     lda #$58
     sta introScreenStart
@@ -316,6 +319,11 @@ irq:
     pha
 
     ; Check status
+    ; Sort of switch-case
+    ;   0   intro running
+    ;   1   for future use
+    ;   2   actual game running
+    ;   3   gameover
     lda status
     cmp #0
     bne checkStatus1
@@ -351,64 +359,83 @@ checkEndStatus:
     ; Go to original system routine
     jmp $ea31
 
+; Currently status0 is the same as status1
+; status1 has just been reserved for future use
 status0:
-
 status1:
+    ; Decrement interrupt divider for the intro
     ldx introCounter
     dex
     stx introCounter
     cpx #0
-    beq status1do
-    rts
+    beq status1do   ; if divider is 0, then do status1do ...
+    rts             ; ... else just do nothing and return
 status1do:
+    ; Reset introCounter
     ldx #5
     stx introCounter
 
+    ; I want to print strings at different columns to make them
+    ; bounce across the screen, so take last introX and add introXinc,
+    ; then print string at that point. If introX is too far right, then
+    ; set introXinc as #$ff (equals -1) so next time introX will be
+    ; decremented by 1. And then, if introX is too far left, then
+    ; set introXinc as #$01 so next time will be moved to right again.
     lda introX
     clc
-    adc introXinc
+    adc introXinc       ; this is #$01 or #$0ff, so actually it is +1 or -1
     sta introX
-    cmp #19
-    beq status1setSX
-    cmp #0
-    beq status1setDX
-    jmp status1okset
+    cmp #19             ; am I too far right?
+    beq status1setSX    ; if yes, set SX (left)
+    cmp #0              ; am I too far left?
+    beq status1setDX    ; if yes, set DX (right)
+    jmp status1okset    ; else do nothing (aka, next time re-use current
+                        ; increment value)
 status1setDX:
-    lda #$01
+    lda #$01            ; set introXinc as +1
     sta introXinc
     jmp status1okset
 status1setSX:
-    lda #$ff
+    lda #$ff            ; set introXinc as -1
     sta introXinc
     jmp status1okset
 
 status1okset:
+    ; Print "SNAKE BY GIOMBA" (see above for pointer details)
     lda #<intro0string
     sta printIntroString
     lda #>intro0string
     sta printIntroString + 1
+    ; $0428 is 2nd line (previously filled with color shades by reset routine)
     lda #$28
     clc
-    adc introX
+    adc introX                  ; just add X, to make it look like it has moved
     sta introScreenStart
     lda #$04
     sta introScreenStart + 1
     jsr printIntro
 
+    ; Print "PRESS SPACE TO PLAY"
     lda #<intro1string
     sta printIntroString
     lda #>intro1string
     sta printIntroString + 1
+    ; $0478 is 4th line (previously filled with color shades by reset routine)
+    ; add #19, then sub introX will make it move to other way of 2nd line
     lda #$78
     clc
-    adc #19
+    adc #19         ; add #19
     sec
-    sbc introX
+    sbc introX      ; sub introX
     sta introScreenStart
     lda #$04
     sta introScreenStart + 1
     jsr printIntro
 
+    ; Some considerations on speed:
+    ; yes, maybe I should have put the string chars once in screen text memory
+    ; and then move it left and right. Should re-think about this.
+    ; For now, just return.
     rts
 
 status2:    ; do Game
@@ -619,9 +646,11 @@ foodOK:
     lda foodColor
     sta (tileMem),y
 
+    ; print score at $10th column
     ldy #$10
     lda length
-    jsr printByte      ; print score
+    jsr printByte
+
     jmp checkEndSelfEat
 checkEndFood:
 
@@ -675,9 +704,14 @@ gameover:
     sta printStatusString + 1
     jsr printStatus
 
+    ; Set gameover status
+    ; this way, the loop out of this interrupt, will know that we
+    ; finished, and play the intro again
     lda #3
     sta status
     rts
+; TODO : must be added a delay to let the player see her/his final score
+; before clearing the screen and starting with the intro again
 
 ; Subroutines
 ; ----------------------------------------------------------------------
@@ -787,19 +821,35 @@ printStatusEnd:
     rts
 
 ; Print string for intro
+; Input parameters:
+;   printIntroString    pointer to string to be printed (source)
+;   introScreenStart    pointer to text video memory on screen where to print (dest)
 printIntro:
     ldy #0
 printIntroLoop:
-    lda (printIntroString),y
-    beq printIntroEnd
-    cmp #$40
-    bcc printIntroEndCheck
+    lda (printIntroString),y    ; get char from string
+    beq printIntroEnd           ; if zero, then end (string must be null-terminated)
+    cmp #$40                    ; is char greater or equal to #$40 = #64 = `@' ?
+    bcc printIntroEndCheck      ; if not, it is less, thus it must be
+                                ; a full stop, comma, colon or something
+                                ; that actually has the same value in both
+                                ; true ASCII and in PET screen codes
+                                ; otherwise, it is greater than `@`, so must
+                                ; subtract 64 because CBM and its encodings
+                                ; are simply a big shit
     sec
     sbc #$40
 
 printIntroEndCheck:
-    sta (introScreenStart),y
-    iny
+    sta (introScreenStart),y    ; put screen code to screen
+    iny                         ; next char in string
     jmp printIntroLoop
 printIntroEnd:
     rts
+
+;
+; coded during december 2017
+; by giomba -- giomba@glgprograms.it
+; this software is free software and is distributed
+; under the terms of GNU GPL v3 license
+;
