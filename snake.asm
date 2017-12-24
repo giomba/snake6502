@@ -67,7 +67,13 @@ status:
 
 ; Intro counter
 introCounter:
-    BYTE
+    BYTE #$4
+
+; Intro string x position, and next increment
+introX:
+    BYTE #$0
+introXinc:
+    BYTE #$1
 
 ; Costants
 ; ----------------------------------------------------------------------
@@ -90,8 +96,18 @@ gameoverString:
     BYTE "GAME IS OVER"
     BYTE #0
 intro0string:
-    BYTE "SNAKE BY GIOMBA"
+    BYTE "   SNAKE BY GIOMBA   "
     BYTE #0
+intro1string:
+    BYTE " PRESS SPACE TO PLAY "
+    BYTE #0
+intro2string:
+    BYTE "RETROFFICINA.GLGPROGRAMS.IT"
+    BYTE 0
+colorshade:
+    BYTE    #11,#11,#11,#11,#11,#12,#12,#12,#12,#12,#5,#5,#5
+    BYTE    #13,#13,#13,#13,#7,#7,#7,#7,#7,#7
+    BYTE    #13,#13,#13,#13,#5,#5,#5,#12,#12,#12,#12,#12,#11,#11,#11,#11,#11
 
 ; List
 ; ----------------------------------------------------------------------
@@ -148,6 +164,8 @@ start:
     ; Enable interrupts
     cli
 
+    jsr introreset
+
 intro0running:
     jsr $ffe4
     cmp #$20
@@ -164,9 +182,17 @@ endless:
     ldx $400
     inx
     stx $400
-    jmp endless
 
-; Full reset
+    lda status
+    cmp #3
+    bne endless
+
+    jsr introreset
+    lda #0
+    sta status
+    jmp intro0running
+
+; Full game reset
 ; ----------------------------------------------------------------------
 fullreset:
     ; Clear screen
@@ -212,6 +238,48 @@ upperbarLoop:
     sta listStart
     lda #5
     sta length
+
+    rts
+
+; Intro reset
+; ----------------------------------------------------------------------
+introreset:
+    ; Clear screen
+    ldx #$ff
+    lda #$20
+introresetCLS:
+    sta $400,x
+    sta $500,x
+    sta $600,x
+    sta $700,x
+    dex
+    cpx #$ff
+    bne introresetCLS
+
+    ldx #39
+introresetColorShade
+    lda colorshade,x
+    sta $d828,x
+    sta $d878,x
+    dex
+    cpx #$ff
+    bne introresetColorShade
+
+    ; Set screen colors
+    lda #0
+    sta $d020   ; overscan
+    lda #0
+    sta $d021   ; center
+
+    lda #<intro2string
+    sta printIntroString
+    lda #>intro2string
+    sta printIntroString + 1
+    lda #$26
+    sta introScreenStart
+    lda #$07
+    sta introScreenStart + 1
+    jsr printIntro
 
     rts
 
@@ -267,20 +335,63 @@ checkEndStatus:
     jmp $ea31
 
 status0:
+
 status1:
+    ldx introCounter
+    dex
+    stx introCounter
+    cpx #0
+    beq status1do
+    rts
+status1do:
+    ldx #5
+    stx introCounter
+
+    lda introX
+    clc
+    adc introXinc
+    sta introX
+    cmp #19
+    beq status1setSX
+    cmp #0
+    beq status1setDX
+    jmp status1okset
+status1setDX:
+    lda #$01
+    sta introXinc
+    jmp status1okset
+status1setSX:
+    lda #$ff
+    sta introXinc
+    jmp status1okset
+
+status1okset:
     lda #<intro0string
     sta printIntroString
     lda #>intro0string
     sta printIntroString + 1
-    lda #$00
+    lda #$28
+    clc
+    adc introX
     sta introScreenStart
-    lda #$05
+    lda #$04
     sta introScreenStart + 1
     jsr printIntro
 
-    ldx $401
-    inx
-    stx $401
+    lda #<intro1string
+    sta printIntroString
+    lda #>intro1string
+    sta printIntroString + 1
+    lda #$78
+    clc
+    adc #19
+    sec
+    sbc introX
+    sta introScreenStart
+    lda #$04
+    sta introScreenStart + 1
+    jsr printIntro
+
     rts
 
 status2:    ; do Game
@@ -546,21 +657,10 @@ gameover:
     lda #>gameoverString
     sta printStatusString + 1
     jsr printStatus
-    jsr sidtune
 
-    sei
-    ldx #$ff
-    ldy #$ff
-gameoverLoop:
-    nop
-    nop
-    nop
-    nop
-    dex
-    bne gameoverLoop
-    dey
-    bne gameoverLoop
-    jmp 64738
+    lda #3
+    sta status
+    rts
 
 ; Subroutines
 ; ----------------------------------------------------------------------
@@ -675,12 +775,12 @@ printIntro:
 printIntroLoop:
     lda (printIntroString),y
     beq printIntroEnd
-    cmp #$20
-    bne printIntroSkipSpace
-    lda #$60
-printIntroSkipSpace:
+    cmp #$40
+    bcc printIntroEndCheck
     sec
     sbc #$40
+
+printIntroEndCheck:
     sta (introScreenStart),y
     iny
     jmp printIntroLoop
