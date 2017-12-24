@@ -4,9 +4,16 @@
 ; ----------------------------------------------------------------------
 
 ; Where is the snake head in video memory? Do math to calculate address
-; using $a0-$a1
+; using pointer at $a0-$a1
 tileMem = $a0
+
+; Pointer to status string ($a3-$a4)
 printStatusString = $a3
+
+; Pointer to intro string ($a3-$a4)
+printIntroString = $a3
+; Pointer to screen position where to print intro string ($fb-$fc)
+introScreenStart = $fb
 
     org $801
 . = $801    ; 10 SYS9216 ($2400) BASIC autostart
@@ -54,8 +61,12 @@ length:
 random:
     BYTE
 
-; Status (0 intro playing, 1 game running)
+; Status (0 fist time intro playing, 1 init (title) screen, 2 game running)
 status:
+    BYTE
+
+; Intro counter
+introCounter:
     BYTE
 
 ; Costants
@@ -78,6 +89,9 @@ foodColor:
 gameoverString:
     BYTE "GAME IS OVER"
     BYTE #0
+intro0string:
+    BYTE "SNAKE BY GIOMBA"
+    BYTE #0
 
 ; List
 ; ----------------------------------------------------------------------
@@ -93,23 +107,6 @@ listY:
 start:
     ; Clear screen, initialize keyboard, restore interrupts
     jsr $ff81
-
-    ; Set screen colors
-    ; - - - - - - - - -
-    lda #12
-    sta $d020   ; overscan
-    lda #9
-    sta $d021   ; center
-    ; Upper bar -- fill with reversed spaces, color yellow
-    ldx #39
-upperbarLoop:
-    lda #$a0    ; reversed color space
-    sta $400,x
-    lda #7
-    sta $d800,x
-    dex
-    cpx #$ff
-    bne upperbarLoop
 
     ; Disable all interrupts
     sei
@@ -144,30 +141,26 @@ upperbarLoop:
     lda #0
     jsr sidtune
 
-    ; Put first piece of food
-    lda foodTile
-    sta $500
+    ; Set status as first-time intro playing
+    lda #0
+    sta status
 
     ; Enable interrupts
     cli
 
-    jsr fullreset
-
-    ; Simple intro
-intro:
-    ldx 53280
-    inx
-    stx 53280
-
+intro0running:
     jsr $ffe4
     cmp #$20
-    bne intro
+    bne intro0running
 
-    lda #1
+    ; Set init variables of the game
+    jsr fullreset
+    ; Set status as game playing
+    lda #2
     sta status
 
 endless:
-    ; Endless loop, show that there is enogh time after the interrupt
+    ; Endless loop, show that there is enough time after the interrupt
     ldx $400
     inx
     stx $400
@@ -176,6 +169,37 @@ endless:
 ; Full reset
 ; ----------------------------------------------------------------------
 fullreset:
+    ; Clear screen
+    ldx #$ff
+    lda #$20
+fullresetCLS:
+    sta $400,x
+    sta $500,x
+    sta $600,x
+    sta $700,x
+    dex
+    cpx #$ff
+    bne fullresetCLS
+
+    ; Set screen colors
+    lda #12
+    sta $d020   ; overscan
+    lda #9
+    sta $d021   ; center
+    ; Upper bar -- fill with reversed spaces, color yellow
+    ldx #39
+upperbarLoop:
+    lda #$a0    ; reversed color space
+    sta $400,x
+    lda #7
+    sta $d800,x
+    dex
+    cpx #$ff
+    bne upperbarLoop
+
+    ; Init game variables
+    lda foodTile
+    sta $500        ; Put first piece of food
     lda #4
     sta irqn
     lda #6
@@ -188,29 +212,85 @@ fullreset:
     sta listStart
     lda #5
     sta length
-    lda #0
-    sta status
+
     rts
 
 ; Interrupt Handler
 ; ----------------------------------------------------------------------
 irq:
+    ; Things that must be done every interrupt (50Hz)
+    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Acknoweledge IRQ
     dec $d019
 
+    ; Save registers in stack
+    pha
+    txa
+    pha
+    tya
+    pha
+
     ; Check status
     lda status
+    cmp #0
+    bne checkStatus1
+    jsr status0
+    jmp checkEndStatus
+checkStatus1:
     cmp #1
-    beq doGame      ; if status is 1, must do game
-    jmp irqalways   ; else simply do every-interrupt tasks (always-do)
+    bne checkStatus2
+    jsr status1
+    jmp checkEndStatus
+checkStatus2
+    cmp #2
+    bne checkEndStatus
+    jsr status2
+    jmp checkEndStatus
+checkEndStatus:
 
-doGame:
+    ; Play music
+    jsr sidtune + 3
+
+    ; Increase random value
+    ldx random
+    inx
+    stx random
+
+    ; Restore registers from stack
+    pla
+    tay
+    pla
+    tax
+    pla
+
+    ; Go to original system routine
+    jmp $ea31
+
+status0:
+status1:
+    lda #<intro0string
+    sta printIntroString
+    lda #>intro0string
+    sta printIntroString + 1
+    lda #$00
+    sta introScreenStart
+    lda #$05
+    sta introScreenStart + 1
+    jsr printIntro
+
+    ldx $401
+    inx
+    stx $401
+    rts
+
+status2:    ; do Game
     ; Check counter
     ldx irqn
     dex
     stx irqn
-    beq irqsometime   ; if counter is 0, then do these "rare" things
-    jmp irqalways     ; else skip this section, and go to always-do interrupt routine
+    beq irqsometime     ; if counter is 0, then do these "rare" things
+    rts                 ; else do nothing and simply return
+    ; as you can see, game actually runs at 12 Hz
 
 irqsometime:
     ; Things that must be done only one in four interrupts (12 Hz)
@@ -396,14 +476,6 @@ foodOK:
     lda calcTileY
     jsr printByte
 
-    ; debug -- print snake head X,Y
-    ldy #$1f
-    lda snakeX
-    jsr printByte
-    ldy #$22
-    lda snakeY
-    jsr printByte
-
     ldy #0
     jsr calcTileMem     ; calc food address in memory
     lda (tileMem),y     ; check if memory is empty
@@ -464,22 +536,7 @@ checkEndSelfEat:
 
 skipPauseTests:
 
-irqalways:
-    ; Things that must be done every interrupt (50Hz)
-    ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    ; Play music
-    jsr sidtune + 3
-
-    ; Increase random value
-    ldx random
-    inx
-    stx random
-
-    ; Go to original system routine
-    jmp $ea31
-
-    brk
+    rts
 
 ; Game is over
 ; ----------------------------------------------------------------------
@@ -610,4 +667,22 @@ printStatusSkipSpace:
     iny
     jmp printStatusLoop
 printStatusEnd:
+    rts
+
+; Print string for intro
+printIntro:
+    ldy #0
+printIntroLoop:
+    lda (printIntroString),y
+    beq printIntroEnd
+    cmp #$20
+    bne printIntroSkipSpace
+    lda #$60
+printIntroSkipSpace:
+    sec
+    sbc #$40
+    sta (introScreenStart),y
+    iny
+    jmp printIntroLoop
+printIntroEnd:
     rts
