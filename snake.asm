@@ -15,6 +15,13 @@ printIntroString = $a3
 ; Pointer to screen position where to print intro string ($fb-$fc)
 introScreenStart = $fb
 
+; Status of the game (costants pre-processor defined)
+ST_INTRO0   =   0
+ST_INTRO1   =   1
+ST_PLAY     =   2
+ST_OUTRO    =   3
+ST_END      =   4
+
     org $801
 . = $801    ; 10 SYS9216 ($2400) BASIC autostart
     BYTE #$0b,#$08,#$0a,#$00,#$9e,#$39,#$32,#$31,#$36,#$00,#$00,#$00
@@ -62,11 +69,6 @@ random:
     BYTE
 
 ; Status
-; 0 fist time intro playing
-; 1 init (title) screen
-; 2 game running
-; 3 outro
-; 4 end
 status:
     BYTE
 
@@ -170,7 +172,7 @@ start:
     jsr sidtune
 
     ; Set status as first-time intro playing
-    lda #0
+    lda #ST_INTRO0
     sta status
 
     ; Enable interrupts
@@ -192,18 +194,18 @@ intro0end:
     ; Set init variables of the game
     jsr fullreset
     ; Set status as game playing
-    lda #2
+    lda #ST_PLAY
     sta status
 
 endless:
     ; Loop waiting for gameover
     lda status
-    cmp #4          ; is status equal to 4 (gameover) ?
+    cmp #ST_END     ; is status equal to end ?
     bne endless     ; if not, just wait looping here, else...
 
     jsr introreset  ; reset variables for intro
-    lda #0
-    sta status      ; put machine into 0 status (play intro)
+    lda #ST_INTRO0
+    sta status      ; put machine into play intro status
     jmp intro0running   ; and go there waiting for keypress
 
 ; Full game reset
@@ -327,32 +329,27 @@ irq:
     tya
     pha
 
-    ; Check status
+    ; Check status and call appropriate sub-routine
     ; Sort of switch-case
-    ;   0   intro running
-    ;   1   for future use
-    ;   2   actual game running
-    ;   3   after-game outro
-    ;   4   gameover
     lda status
-    cmp #0
+    cmp #ST_INTRO0
     bne checkStatus1
-    jsr status0
+    jsr statusIntro0
     jmp checkEndStatus
 checkStatus1:
-    cmp #1
+    cmp #ST_INTRO1
     bne checkStatus2
-    jsr status1
+    jsr statusIntro1
     jmp checkEndStatus
 checkStatus2
-    cmp #2
+    cmp #ST_PLAY
     bne checkStatus3
-    jsr status2
+    jsr statusPlay
     jmp checkEndStatus
 checkStatus3
-    cmp #3
+    cmp #ST_OUTRO
     bne checkEndStatus
-    jsr status3
+    jsr statusOutro
     jmp checkEndStatus
 checkEndStatus:
 
@@ -374,10 +371,10 @@ checkEndStatus:
     ; Go to original system routine
     jmp $ea31
 
-; Currently status0 is the same as status1
-; status1 has just been reserved for future use
-status0:
-status1:
+; Currently statusIntro0 is the same as statusIntro1
+; statusIntro1 has just been reserved for future use
+statusIntro0:
+statusIntro1:
     ; Decrement interrupt divider for the intro
     ldx introCounter
     dex
@@ -453,7 +450,7 @@ status1okset:
     ; For now, just return.
     rts
 
-status2:    ; do Game
+statusPlay:     ; do Game
     ; Check counter
     ldx irqn
     dex
@@ -719,26 +716,26 @@ gameover:
     sta printStatusString + 1
     jsr printStatus
 
-    ; Set gameover status
-    ; this way, the loop out of this interrupt, will know that we
-    ; finished, and play the intro again
+    ; Set gameover and outro status
     lda #$ff
     sta outroDelay
-    lda #3
+    lda #ST_OUTRO
     sta status
     rts
 
 ; Decrement outroDelay, just to let player see her/his end screen
 ; with score
-status3:
+statusOutro:
     ldy outroDelay  ; load outroDelay and decrement
     dey
     sty outroDelay
     cpy #0
-    beq status3end
+    beq statusOutroEnd
     rts
-status3end:
-    lda #4          ; go to end status
+statusOutroEnd:
+    ; Set status as ST_END: this way, the loop out of this interrupt,
+    ; will know that we finished, and will play the intro again
+    lda #ST_END
     sta status
     rts
 
