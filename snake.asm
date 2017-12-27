@@ -15,13 +15,6 @@ printIntroString = $a3
 ; Pointer to screen position where to print intro string ($fb-$fc)
 introScreenStart = $fb
 
-; Status of the game (costants pre-processor defined)
-ST_INTRO0   =   0
-ST_INTRO1   =   1
-ST_PLAY     =   2
-ST_OUTRO    =   3
-ST_END      =   4
-
     org $801
 . = $801    ; 10 SYS9216 ($2400) BASIC autostart
     BYTE #$0b,#$08,#$0a,#$00,#$9e,#$39,#$32,#$31,#$36,#$00,#$00,#$00
@@ -89,20 +82,24 @@ outroDelay
 ; Costants
 ; ----------------------------------------------------------------------
 
-; Screen width and height
-screenW:
-    BYTE #40
-screenH:
-    BYTE #24
-snakeTile:
-    BYTE #81
-snakeColor:
-    BYTE #5
-foodTile:
-    BYTE #90
-foodColor:
-    BYTE #15
+; Status of the game (costants pre-processor defined, sort of enum)
+ST_INTRO0   =   0
+ST_INTRO1   =   1
+ST_PLAY     =   2
+ST_OUTRO    =   3
+ST_END      =   4
 
+; Screen features
+SCREEN_W    =   40
+SCREEN_H    =   24
+; Snake features
+SNAKE_TILE  =   81
+SNAKE_COLOR =   5
+; Food features
+FOOD_TILE   =   90
+FOOD_COLOR  =   15
+
+; Strings
 gameoverString:
     BYTE "GAME IS OVER"
     BYTE #0
@@ -240,7 +237,7 @@ upperbarLoop:
     bne upperbarLoop
 
     ; Init game variables
-    lda foodTile
+    lda #FOOD_TILE
     sta $500        ; Put first piece of food
     lda #4
     sta irqn        ; Initialize interrupt divider
@@ -595,7 +592,7 @@ overEndCheck:
     sta calcTileY
     jsr calcTileMem
     lda (tileMem),y     ; read content of head memory location
-    cmp foodTile
+    cmp #FOOD_TILE
     beq foodEaten       ; if memory does contain food, then perform foodEaten actions,
     jmp checkSelfEat    ; else just loooong jump to test if I ate myself
 foodEaten:
@@ -608,15 +605,15 @@ genFood:
     stx random
 
     txa
-genFoodX:               ; calculate `random` modulo `screenW`
+genFoodX:               ; calculate `random` modulo SCREEN_W
     sec
-    sbc screenW
-    cmp screenW
+    sbc #SCREEN_W
+    cmp #SCREEN_W
     bcs genFoodX
     sta calcTileX
 
     txa
-genFoodY:               ; calculate `random` modulo 22 (22 = screenH - 1)
+genFoodY:               ; calculate `random` modulo 22 (22 = SCREEN_H - 1)
     sec
     sbc #22
     cmp #22
@@ -648,14 +645,14 @@ foodOK:
     lda (tileMem),y     ; check if memory is empty
     cmp #$20            ; is there a space?
     bne genFood         ; if not, must generate another number
-    lda foodTile        ; else, just put that fucking piece of food there
+    lda #FOOD_TILE      ; else, just put that fucking piece of food there
     sta (tileMem),y
 
     lda #$d4
     clc
     adc tileMem + 1
     sta tileMem + 1
-    lda foodColor
+    lda #FOOD_COLOR
     sta (tileMem),y
 
     ; print score at $10th column
@@ -668,26 +665,26 @@ checkEndFood:
 
     ; --- Self eat ---
 checkSelfEat:
-    cmp snakeTile
+    cmp #SNAKE_TILE
     bne checkEndSelfEat
     jmp gameover
 checkEndSelfEat:
 
     ; Draw snake head
     ldy #0
-    lda snakeX          ; calc char address in video memory, and put snakeTile
+    lda snakeX          ; calc char address in video memory, and put SNAKE_TILE
     sta calcTileX
     lda snakeY
     sta calcTileY
     jsr calcTileMem
-    lda snakeTile
+    lda #SNAKE_TILE
     sta (tileMem),y
 
     lda #$d4            ; add #$d400 to previous address (obtain color memory
-    clc                 ; correspondent), and put snakeColor
+    clc                 ; correspondent), and put SNAKE_COLOR
     adc tileMem + 1
     sta tileMem + 1
-    lda snakeColor
+    lda #SNAKE_COLOR
     sta (tileMem),y
 
     ; Erase snake tail
@@ -743,7 +740,7 @@ statusOutroEnd:
 ; ----------------------------------------------------------------------
 ; Do some math to calculate tile address in video memory
 ; using x,y coordinates
-; Formula:  addr = $400 + y * screenW + x
+; Formula:  addr = $400 + y * SCREEN_W + x
 calcTileMem:
     ; Save registers
     pha
@@ -764,7 +761,7 @@ calcTileMult:
     beq calcTileEnd     ; if Y is equal to zero, nothing to do, just skip moltiplication, else...
     dey                 ; decrement Y
     clc
-    lda screenW         ; A = screen width = 40
+    lda #SCREEN_W       ; A = screen width = 40
     adc tileMem         ; A = screen width + tileMem (low)
     sta tileMem         ; update tileMem (low)
     lda #0              ; do the same with higher byte: A = 0
