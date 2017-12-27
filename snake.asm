@@ -872,7 +872,7 @@ printIntroEnd:
 
 ;
 ; coded during december 2017
-; by giomba -- giomba@glgprograms.it
+; by giomba -- giomba at glgprograms.it
 ; this software is free software and is distributed
 ; under the terms of GNU GPL v3 license
 ;
