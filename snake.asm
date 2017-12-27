@@ -61,7 +61,12 @@ length:
 random:
     BYTE
 
-; Status (0 fist time intro playing, 1 init (title) screen, 2 game running)
+; Status
+; 0 fist time intro playing
+; 1 init (title) screen
+; 2 game running
+; 3 outro
+; 4 end
 status:
     BYTE
 
@@ -74,6 +79,10 @@ introX:
     BYTE #$0
 introXinc:
     BYTE #$1
+
+; Outro delay
+outroDelay
+    BYTE #$ff
 
 ; Costants
 ; ----------------------------------------------------------------------
@@ -189,7 +198,7 @@ intro0end:
 endless:
     ; Loop waiting for gameover
     lda status
-    cmp #3          ; is status equal to 3 (gameover) ?
+    cmp #4          ; is status equal to 4 (gameover) ?
     bne endless     ; if not, just wait looping here, else...
 
     jsr introreset  ; reset variables for intro
@@ -323,7 +332,8 @@ irq:
     ;   0   intro running
     ;   1   for future use
     ;   2   actual game running
-    ;   3   gameover
+    ;   3   after-game outro
+    ;   4   gameover
     lda status
     cmp #0
     bne checkStatus1
@@ -336,8 +346,13 @@ checkStatus1:
     jmp checkEndStatus
 checkStatus2
     cmp #2
-    bne checkEndStatus
+    bne checkStatus3
     jsr status2
+    jmp checkEndStatus
+checkStatus3
+    cmp #3
+    bne checkEndStatus
+    jsr status3
     jmp checkEndStatus
 checkEndStatus:
 
@@ -707,11 +722,25 @@ gameover:
     ; Set gameover status
     ; this way, the loop out of this interrupt, will know that we
     ; finished, and play the intro again
+    lda #$ff
+    sta outroDelay
     lda #3
     sta status
     rts
-; TODO : must be added a delay to let the player see her/his final score
-; before clearing the screen and starting with the intro again
+
+; Decrement outroDelay, just to let player see her/his end screen
+; with score
+status3:
+    ldy outroDelay  ; load outroDelay and decrement
+    dey
+    sty outroDelay
+    cpy #0
+    beq status3end
+    rts
+status3end:
+    lda #4          ; go to end status
+    sta status
+    rts
 
 ; Subroutines
 ; ----------------------------------------------------------------------
