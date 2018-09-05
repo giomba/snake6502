@@ -1,5 +1,14 @@
     processor 6502
 
+; Platform specific code
+; Code yet to be developed, example to use:
+; ----------------------------------------------------------------------
+#if SYSTEM = 64
+	; Commodore64 specific code
+#else
+	; Commodore16 specific code
+#endif
+
 ; Zero page utilities
 ; ----------------------------------------------------------------------
 
@@ -104,7 +113,11 @@ gameoverString:
     BYTE "GAME IS OVER"
     BYTE #0
 intro0string:
+#if SYSTEM = 64
     BYTE "   SNAKE BY GIOMBA   "
+#else
+	BYTE "  SNAKE16 BY GIOMBA  "
+#endif
     BYTE #0
 intro1string:
     BYTE " PRESS SPACE TO PLAY "
