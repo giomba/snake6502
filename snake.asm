@@ -132,6 +132,9 @@ colorshade: ; a shade from dark-gray to bright yellow, and vice-versa (40 column
     BYTE    #11,#11,#11,#11,#11,#12,#12,#12,#12,#12,#5,#5,#5
     BYTE    #13,#13,#13,#13,#7,#7,#7,#7,#7,#7
     BYTE    #13,#13,#13,#13,#5,#5,#5,#12,#12,#12,#12,#12,#11,#11,#11,#11,#11
+scoreString:
+	BYTE "POINTS"
+	BYTE #0
 
 ; List
 ; ----------------------------------------------------------------------
@@ -248,6 +251,13 @@ upperbarLoop:
     dex
     cpx #$ff
     bne upperbarLoop
+
+	; Set upper bar text
+	lda #<scoreString
+	sta printStatusString
+	lda #>scoreString
+	sta printStatusString + 1
+	jsr printStatus
 
     ; Init game variables
     lda #FOOD_TILE
@@ -702,12 +712,12 @@ genFoodY:               ; calculate `random` modulo 22 (22 = SCREEN_H - 1)
     beq genFood
 foodOK:
     ; debug -- print choosen X,Y for food
-    ldy #$18
-    lda calcTileX
-    jsr printByte
-    ldy #$1b
-    lda calcTileY
-    jsr printByte
+    ; ldy #$18
+    ; lda calcTileX
+    ; jsr printByte
+    ; ldy #$1b
+    ; lda calcTileY
+    ; jsr printByte
 
     ldy #0
     jsr calcTileMem     ; calc food address in memory
