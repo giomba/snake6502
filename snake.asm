@@ -527,6 +527,62 @@ keybCheckP:
     jmp keybEndCheck
 keybEndCheck:
 
+	; Get joystick status and decide snake direction
+	; Joystick register bits 4:0 => Fire,Right,Left,Down,Up
+	; 0 = Pressed; 1 = Idle
+	lda $dc00			; CIA joystick port 2 register
+	ror					; rotate bit and put bit#0 in CF
+	tax					; store byte value for next key check
+	bcs joyCheckDown	; if CF = 1, then key was not depressed, so skip and check next...
+						; ... else key was depressed!
+	lda direction		; check for not overlapping direction (turn over yourself)
+	cmp #2
+	beq joyEndCheck
+	lda #8
+	sta direction
+	jmp joyEndCheck
+joyCheckDown:
+	txa
+	ror
+	tax
+	bcs joyCheckLeft
+	lda direction
+	cmp #8
+	beq joyEndCheck
+	lda #2
+	sta direction
+	jmp joyEndCheck
+joyCheckLeft:
+	txa
+	ror
+	tax
+	bcs joyCheckRight
+	lda direction
+	cmp #6
+	beq joyEndCheck
+	lda #4
+	sta direction
+	jmp joyEndCheck
+joyCheckRight:
+	txa
+	ror
+	tax
+	bcs joyCheckFire
+	lda direction
+	cmp #4
+	beq joyEndCheck
+	lda #6
+	sta direction
+	jmp joyEndCheck
+joyCheckFire:			; `Fire` joystick key used to pause game
+	txa
+	ror
+	tax
+	bcs joyEndCheck
+	lda #5
+	sta direction
+joyEndCheck:
+
     ; Get direction and move head accordingly
     lda direction
 dirCheck2:          ; check if direction is down...
