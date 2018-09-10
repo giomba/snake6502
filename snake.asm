@@ -25,19 +25,11 @@ printIntroString = $a3
 introScreenStart = $fb
 
     org $801
-. = $801    ; 10 SYS9216 ($2400) BASIC autostart
-    BYTE #$0b,#$08,#$0a,#$00,#$9e,#$39,#$32,#$31,#$36,#$00,#$00,#$00
-
-; SID tune (previously properly cleaned, see HVSC)
-; ----------------------------------------------------------------------
-. = $1000
-sidtune:
-    INCBIN "snake.sid"
+. = $801    ; 10 SYS10240 ($2800) BASIC autostart
+    BYTE #$0b,#$08,#$0a,#$00,#$9e,#$31,#$30,#$32,#$34,#$30,#$00,#$00,#$00
 
 ; Data section
 ; ----------------------------------------------------------------------
-. = $2100
-
 ; Number of interrupt
 ; Used as counter to be decremented to do some things less frequently
 irqn:
@@ -128,34 +120,40 @@ intro2string:
 intro3string:
     BYTE "(C) 2018"
     BYTE #0
-colorshade: ; a gradient of dark-bright-dark, with only hi-res colors (40 columns)
-	BYTE	#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5	
-;	BYTE	#6,#6,#6
-;	BYTE	#2,#2,#2,#2
-;	BYTE	#5,#5,#5,#5
-;	BYTE	#7,#7,#7,#7
-;	BYTE	#3,#3,#3,#3
-;	BYTE	#1,#1,#1,#1
-;	BYTE	#3,#3,#3,#3
-;	BYTE	#7,#7,#7,#7
-;	BYTE	#5,#5,#5,#5
-;	BYTE	#2,#2,#2,#2
-;	BYTE	#6,#6,#6
+colorshade: ; a gradient of dark-bright-dark (40 columns)
+	HEX 0b 0b 0b 0b 0b 0c 0c 0c 0c 0c 05 05 05 0d 0d 0d 0d 07 07 07 07 07 07 0d 0d 0d 0d 05 05 05 0c 0c 0c 0c 0c 0b 0b 0b 0b 0b
 scoreString:
 	BYTE "POINTS"
 	BYTE #0
 
+#if DEBUG = 1
+	ECHO "End of Data. Space left: ",($e00 - .)
+#endif
+
 ; List
 ; ----------------------------------------------------------------------
-. = $2200
+. = $e00
 listX:
-
-. = $2300
+. = $f00
 listY:
+
+; SID tune (previously properly cleaned, see HVSC)
+; ----------------------------------------------------------------------
+. = $1000
+sidtune:
+    INCBIN "amour.sid"
+#if DEBUG = 1
+	ECHO "End of SIDtune. Space left: ",($2000 - .)
+#endif
+
+. = $2000
+; This binary data that defines the font is exactly 2kB long ($800)
+tggsFont:
+	INCBIN "tggs.font"
 
 ; ENTRY OF PROGRAM
 ; ----------------------------------------------------------------------
-. = $2400
+. = $2800
 start:
     ; Clear screen, initialize keyboard, restore interrupts
     jsr $ff81
@@ -288,6 +286,16 @@ upperbarLoop:
     lda #5
     sta length      ; Length of the list
 
+	; Clear snake lists X and Y
+	lda #$0
+	ldx #$ff
+clearListLoop:
+	dex
+	sta listX,x
+	sta listY,y
+	cpx #$0
+	bne clearListLoop	
+
     rts
 
 ; Intro reset
@@ -393,6 +401,10 @@ checkEndStatus:
 
     ; Play music
     jsr sidtune + 3
+	jsr sidtune + 3
+	jsr sidtune + 3
+	jsr sidtune + 3
+	jsr sidtune + 3
 
     ; Increase random value
     inc random
@@ -975,6 +987,9 @@ printIntroEnd:
 ; ______________________________________________________________________
 	INCLUDE "multicolor.asm"
 
+#if DEBUG = 1
+	ECHO "Program ends at: ",.
+#endif
 ;
 ; coded during december 2017
 ; by giomba -- giomba at glgprograms.it

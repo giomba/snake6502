@@ -5,101 +5,47 @@ multicolor SUBROUTINE
 ; Prepare data struct for MultiColor mode
 ; ----------------------------------------------------------------------
 multicolorInit:
-	; Deactivate interrupt
-	; This is needed to avoid calls from I/O while dealing with bank
-	; switching (I/O addresses are the same)
-	sei
-
-	; Put char ROM in CPU address space
-	; It becomes visible at $d000
-	; This overrides I/O
-;	lda $1
-;	and #$fb
-;	sta $1
-
-	; Copy ROM original content from $d000 to $3800
-;	ldx #0
-;.copyLoop:
-;	lda $d000,x
-;	sta $3800,x
-;	lda $d100,x
-;	sta $3900,x
-;	lda $d200,x
-;	sta $3a00,x
-;	lda $d300,x
-;	sta $3b00,x
-;	lda $d400,x
-;	sta $3c00,x
-;	lda $d500,x
-;	sta $3d00,x
-;	lda $d600,x
-;	sta $3e00,x
-;	lda $d700,x
-;	sta $3f00,x
-;	inx
-;	bne .copyLoop
-
-	; Copy The GGS Font and
-	; make higher half the inverse of lower one
+	; Make font higher half the inverse of lower one
+	; TODO: merge these edits with actual font binary
 	ldx #$00
 .tggsCopy
 	dex
-	lda .tggsFont,x
-	sta $3800,x
+	lda tggsFont,x
 	eor #$ff
-	sta $3c00,x
-	lda .tggsFont + $100,x
-	sta $3900,x
+	sta $2400,x
+	lda tggsFont + $100,x
 	eor #$ff
-	sta $3d00,x
-	lda .tggsFont + $200,x
-	sta $3a00,x
+	sta $2500,x
+	lda tggsFont + $200,x
 	eor #$ff
-	sta $3e00,x
-	lda .tggsFont + $300,x
-	sta $3b00,x
+	sta $2600,x
+	lda tggsFont + $300,x
 	eor #$ff
-	sta $3f00,x
+	sta $2700,x
 	cpx #$0
 	bne .tggsCopy
 
-	; Edit character definitions in RAM (using previous defined table)
+	; Alter character definitions in RAM (using previous defined table)
+	; TODO: merge these edits with actual font binary
 	ldx #$8
 .editLoop:
 	dex
 	lda .multicolorSnakeTile,x
-	sta $3800 + SNAKE_TILE * 8,x
+	sta tggsFont + SNAKE_TILE * 8,x
 	lda .multicolorFoodTile,x
-	sta $3800 + FOOD_TILE * 8,x
+	sta tggsFont + FOOD_TILE * 8,x
 ;	lda .multicolorOtherTile,x
-;	sta $3800 + SOME_TILE * 8,x
+;	sta tggsFont + SOME_TILE * 8,x
 ;	...
 	cpx #$0
 	bne .editLoop
 
-	; Put ROM away from CPU address space, and re-enable I/O
-;	lda $1
-;	ora #$4
-;	sta $1
-
-; Set foreground color in [8-F] to all locations to enable multicolor mode for every single char
-;	ldx #0
-;	lda #$d
-;colorLoop:
-;	sta $d800,x
-;	sta $d900,x
-;	sta $da00,x
-;	sta $db00,x
-;	inx
-;	bne colorLoop
-
-	; Tell VIC-II to read characters from $3800 = 0xe * 0x400
-	lda $d018
-	ora #$0e
+	; Tell VIC-II to use:
+	; - screen text memory at	$400	= $400 * 1
+	; - characters ROM at		$2000	= $400 * 8
+	lda #$18
 	sta $d018
-
-	; Re-enable interrupts and return
-	cli
+ 
 	rts
 
 ; Activate multicolor mode
@@ -144,5 +90,4 @@ multicolorOff:
 	BYTE #%00100000
 	BYTE #%00100000
 	BYTE #%10000000
-.tggsFont
-	INCBIN "tggs.font"
+
