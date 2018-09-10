@@ -103,10 +103,10 @@ SCREEN_W    =   40
 SCREEN_H    =   24
 ; Snake features
 SNAKE_TILE  =   81
-SNAKE_COLOR =   5
+SNAKE_COLOR =   13
 ; Food features
 FOOD_TILE   =   90
-FOOD_COLOR  =   15
+FOOD_COLOR  =	11 
 
 ; Strings
 gameoverString:
@@ -128,10 +128,19 @@ intro2string:
 intro3string:
     BYTE "(C) 2018"
     BYTE #0
-colorshade: ; a shade from dark-gray to bright yellow, and vice-versa (40 columns)
-    BYTE    #11,#11,#11,#11,#11,#12,#12,#12,#12,#12,#5,#5,#5
-    BYTE    #13,#13,#13,#13,#7,#7,#7,#7,#7,#7
-    BYTE    #13,#13,#13,#13,#5,#5,#5,#12,#12,#12,#12,#12,#11,#11,#11,#11,#11
+colorshade: ; a gradient of dark-bright-dark, with only hi-res colors (40 columns)
+	BYTE	#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5,#5	
+;	BYTE	#6,#6,#6
+;	BYTE	#2,#2,#2,#2
+;	BYTE	#5,#5,#5,#5
+;	BYTE	#7,#7,#7,#7
+;	BYTE	#3,#3,#3,#3
+;	BYTE	#1,#1,#1,#1
+;	BYTE	#3,#3,#3,#3
+;	BYTE	#7,#7,#7,#7
+;	BYTE	#5,#5,#5,#5
+;	BYTE	#2,#2,#2,#2
+;	BYTE	#6,#6,#6
 scoreString:
 	BYTE "POINTS"
 	BYTE #0
@@ -184,6 +193,9 @@ start:
     lda #0
     jsr sidtune
 
+	; Initialize MultiColor mode
+	jsr multicolorInit
+
     ; Set status as first-time intro playing
     lda #ST_INTRO0
     sta status
@@ -224,6 +236,9 @@ endless:
 ; Full game reset
 ; ----------------------------------------------------------------------
 fullreset:
+	; Turn MultiColor mode on
+	jsr multicolorOn
+
     ; Clear screen
     ldx #$ff
     lda #$20
@@ -236,11 +251,9 @@ fullresetCLS:
     cpx #$ff
     bne fullresetCLS
 
-    ; Set screen colors
-    lda #12
-    sta $d020   ; overscan
-    lda #9
-    sta $d021   ; center
+    ; Set overscan
+    lda #11
+    sta $d020
     ; Upper bar -- fill with reversed spaces, color yellow
     ldx #39
 upperbarLoop:
@@ -280,6 +293,8 @@ upperbarLoop:
 ; Intro reset
 ; ----------------------------------------------------------------------
 introreset:
+	jsr multicolorOff
+
     ; Clear screen
     ldx #$ff
     lda #$20
@@ -292,9 +307,7 @@ introresetCLS:
     cpx #$ff
     bne introresetCLS
 
-    ; Copy shade colors from costant table to color RAM for 2nd and 4th
-    ; line of text. Soon there will be some text bouncing on these
-    ; lines
+    ; Copy shade colors from costant table to color RAM for 2nd and 4th line of text
     ldx #39
 introresetColorShade
     lda colorshade,x
@@ -307,7 +320,6 @@ introresetColorShade
     ; Set screen colors
     lda #0
     sta $d020   ; overscan
-    lda #0
     sta $d021   ; center
 
     ; Print website
@@ -349,6 +361,12 @@ irq:
     tya
     pha
 
+#if DEBUG = 1
+	; Change background to visually see the ISR timing
+	lda #2
+	sta $d020
+#endif
+
     ; Check status and call appropriate sub-routine
     ; Sort of switch-case
     lda status
@@ -377,9 +395,13 @@ checkEndStatus:
     jsr sidtune + 3
 
     ; Increase random value
-    ldx random
-    inx
-    stx random
+    inc random
+
+#if DEBUG = 1
+	; Change background back again to visally see ISR timing
+	lda #11
+	sta $d020
+#endif
 
     ; Restore registers from stack
     pla
@@ -948,6 +970,10 @@ printIntroEndCheck:
     jmp printIntroLoop
 printIntroEnd:
     rts
+
+; Include
+; ______________________________________________________________________
+	INCLUDE "multicolor.asm"
 
 ;
 ; coded during december 2017
