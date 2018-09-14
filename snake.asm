@@ -11,19 +11,26 @@
 
 ; Zero page utilities
 ; ----------------------------------------------------------------------
-
+	SEG.U zeropage
+	org $02
 ; Where is the snake head in video memory? Do math to calculate address
-; using pointer at $a0-$a1
-tileMem = $a0
+; using pointer at tileMem,tileMem+1
+tileMem DS 2
 
-; Pointer to status string ($a3-$a4)
-printStatusString = $a3
+; Pointer to status string
+printStatusString DS 2
 
-; Pointer to intro string ($a3-$a4)
-printIntroString = $a3
+; Pointer to intro string
+printIntroString DS 2
 ; Pointer to screen position where to print intro string ($fb-$fc)
-introScreenStart = $fb
+introScreenStart DS 2
 
+#if DEBUG = 1
+	; Locations $90-$FF in zeropage are used by kernal
+	ECHO "End of zeropage variables. Space left: ",($90 - .)
+#endif
+
+	SEG program
     org $801
 . = $801    ; 10 SYS10240 ($2800) BASIC autostart
     BYTE #$0b,#$08,#$0a,#$00,#$9e,#$31,#$30,#$32,#$34,#$30,#$00,#$00,#$00
@@ -89,6 +96,7 @@ ST_INTRO1   =   1
 ST_PLAY     =   2
 ST_OUTRO    =   3
 ST_END      =   4
+ST_PAUSE	=	255
 
 ; Screen features
 SCREEN_W    =   40
@@ -118,7 +126,11 @@ intro2string:
     BYTE "RETROFFICINA.GLGPROGRAMS.IT"
     BYTE #0
 intro3string:
+#if DEBUG = 1
+	BYTE "DBG RELS"
+#else
     BYTE "(C) 2018"
+#endif
     BYTE #0
 colorshade: ; a gradient of dark-bright-dark (40 columns)
 	HEX 0b 0b 0b 0b 0b 0c 0c 0c 0c 0c 05 05 05 0d 0d 0d 0d 07 07 07 07 07 07 0d 0d 0d 0d 05 05 05 0c 0c 0c 0c 0c 0b 0b 0b 0b 0b
@@ -194,6 +206,15 @@ start:
 	; Initialize MultiColor mode
 	jsr multicolorInit
 
+	; Zero-fill zeropage variables
+	lda #$0
+	ldx #$90
+zeroFillZeroPage:
+	dex
+	sta $0,x
+	cpx #$2
+	bne zeroFillZeroPage
+
     ; Set status as first-time intro playing
     lda #ST_INTRO0
     sta status
@@ -214,6 +235,9 @@ intro0running:              ; Cycle here until SPACE or `Q` is pressed
 
     ; Intro is finished, now it's time to start the proper game
 intro0end:
+	; Pause everything in interrupt
+	lda #ST_PAUSE
+	sta status
     ; Set init variables of the game
     jsr fullreset
     ; Set status as game playing
@@ -238,15 +262,15 @@ fullreset:
 	jsr multicolorOn
 
     ; Clear screen
-    ldx #$ff
+    ldx #$00
     lda #$20
 fullresetCLS:
+	dex
     sta $400,x
     sta $500,x
     sta $600,x
     sta $700,x
-    dex
-    cpx #$ff
+    cpx #$00
     bne fullresetCLS
 
     ; Set overscan
@@ -277,6 +301,7 @@ upperbarLoop:
     sta irqn        ; Initialize interrupt divider
     lda #6
     sta direction   ; Snake must go right
+	; Note: these values depends on following list initialization
     lda #19
     sta snakeX      ; Snake is at screen center width...
     lda #12
@@ -287,14 +312,15 @@ upperbarLoop:
     sta length      ; Length of the list
 
 	; Clear snake lists X and Y
-	lda #$0
-	ldx #$ff
+	ldx #$00
 clearListLoop:
 	dex
+	lda #19
 	sta listX,x
-	sta listY,y
-	cpx #$0
-	bne clearListLoop	
+	lda #12
+	sta listY,x
+	cpx #$00
+	bne clearListLoop
 
     rts
 
