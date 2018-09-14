@@ -4,15 +4,15 @@
 ; Code yet to be developed, example to use:
 ; ----------------------------------------------------------------------
 #if SYSTEM = 64
-	; Commodore64 specific code
+    ; Commodore64 specific code
 #else
-	; Commodore16 specific code
+    ; Commodore16 specific code
 #endif
 
 ; Zero page utilities
 ; ----------------------------------------------------------------------
-	SEG.U zeropage
-	org $02
+    SEG.U zeropage
+    org $02
 ; Where is the snake head in video memory? Do math to calculate address
 ; using pointer at tileMem,tileMem+1
 tileMem DS 2
@@ -26,11 +26,11 @@ printIntroString DS 2
 introScreenStart DS 2
 
 #if DEBUG = 1
-	; Locations $90-$FF in zeropage are used by kernal
-	ECHO "End of zeropage variables. Space left: ",($90 - .)
+    ; Locations $90-$FF in zeropage are used by kernal
+    ECHO "End of zeropage variables. Space left: ",($90 - .)
 #endif
 
-	SEG program
+    SEG program
     org $801
 . = $801    ; 10 SYS10240 ($2800) BASIC autostart
     BYTE #$0b,#$08,#$0a,#$00,#$9e,#$31,#$30,#$32,#$34,#$30,#$00,#$00,#$00
@@ -40,7 +40,7 @@ introScreenStart DS 2
 ; Number of interrupt
 ; Used as counter to be decremented to do some things less frequently
 irqn:
-	BYTE
+    BYTE
 
 ; Direction of the snake (2,4,6,8 as down,left,right,up)
 ; 5 means `pause`
@@ -87,10 +87,10 @@ introXinc:
 outroDelay
     BYTE #$ff
 
-	INCLUDE "cost.asm"
+    INCLUDE "cost.asm"
 
 #if DEBUG = 1
-	ECHO "End of Data. Space left: ",($e00 - .)
+    ECHO "End of Data. Space left: ",($e00 - .)
 #endif
 
 ; List
@@ -106,13 +106,13 @@ listY:
 sidtune:
     INCBIN "amour.sid"
 #if DEBUG = 1
-	ECHO "End of SIDtune. Space left: ",($2000 - .)
+    ECHO "End of SIDtune. Space left: ",($2000 - .)
 #endif
 
 . = $2000
 ; This binary data that defines the font is exactly 2kB long ($800)
 tggsFont:
-	INCBIN "tggs.font"
+    INCBIN "tggs.font"
 
 ; ENTRY OF PROGRAM
 ; ----------------------------------------------------------------------
@@ -136,8 +136,8 @@ start:
     sta $d01a
 
     ; Store in $314 address of our custom interrupt handler
-    ldx #<irq	; least significant byte
-    ldy #>irq	; most significant byte
+    ldx #<irq   ; least significant byte
+    ldy #>irq   ; most significant byte
     stx $314
     sty $315
 
@@ -154,17 +154,17 @@ start:
     lda #0
     jsr sidtune
 
-	; Initialize MultiColor mode
-	jsr multicolorInit
+    ; Initialize MultiColor mode
+    jsr multicolorInit
 
-	; Zero-fill zeropage variables
-	lda #$0
-	ldx #$90
+    ; Zero-fill zeropage variables
+    lda #$0
+    ldx #$90
 zeroFillZeroPage:
-	dex
-	sta $0,x
-	cpx #$2
-	bne zeroFillZeroPage
+    dex
+    sta $0,x
+    cpx #$2
+    bne zeroFillZeroPage
 
     ; Set status as first-time intro playing
     lda #ST_INTRO0
@@ -186,9 +186,9 @@ intro0running:              ; Cycle here until SPACE or `Q` is pressed
 
     ; Intro is finished, now it's time to start the proper game
 intro0end:
-	; Pause everything in interrupt
-	lda #ST_PAUSE
-	sta status
+    ; Pause everything in interrupt
+    lda #ST_PAUSE
+    sta status
     ; Set init variables of the game
     jsr fullreset
     ; Set status as game playing
@@ -209,14 +209,14 @@ endless:
 ; Full game reset
 ; ----------------------------------------------------------------------
 fullreset:
-	; Turn MultiColor mode on
-	jsr multicolorOn
+    ; Turn MultiColor mode on
+    jsr multicolorOn
 
     ; Clear screen
     ldx #$00
     lda #$20
 fullresetCLS:
-	dex
+    dex
     sta $400,x
     sta $500,x
     sta $600,x
@@ -238,12 +238,12 @@ upperbarLoop:
     cpx #$ff
     bne upperbarLoop
 
-	; Set upper bar text
-	lda #<scoreString
-	sta printStatusString
-	lda #>scoreString
-	sta printStatusString + 1
-	jsr printStatus
+    ; Set upper bar text
+    lda #<scoreString
+    sta printStatusString
+    lda #>scoreString
+    sta printStatusString + 1
+    jsr printStatus
 
     ; Init game variables
     lda #FOOD_TILE
@@ -252,7 +252,7 @@ upperbarLoop:
     sta irqn        ; Initialize interrupt divider
     lda #6
     sta direction   ; Snake must go right
-	; Note: these values depends on following list initialization
+    ; Note: these values depends on following list initialization
     lda #19
     sta snakeX      ; Snake is at screen center width...
     lda #12
@@ -262,23 +262,23 @@ upperbarLoop:
     lda #5
     sta length      ; Length of the list
 
-	; Clear snake lists X and Y
-	ldx #$00
+    ; Clear snake lists X and Y
+    ldx #$00
 clearListLoop:
-	dex
-	lda #19
-	sta listX,x
-	lda #12
-	sta listY,x
-	cpx #$00
-	bne clearListLoop
+    dex
+    lda #19
+    sta listX,x
+    lda #12
+    sta listY,x
+    cpx #$00
+    bne clearListLoop
 
     rts
 
 ; Intro reset
 ; ----------------------------------------------------------------------
 introreset:
-	jsr multicolorOff
+    jsr multicolorOff
 
     ; Clear screen
     ldx #$ff
@@ -347,9 +347,9 @@ irq:
     pha
 
 #if DEBUG = 1
-	; Change background to visually see the ISR timing
-	lda #2
-	sta $d020
+    ; Change background to visually see the ISR timing
+    lda #2
+    sta $d020
 #endif
 
     ; Check status and call appropriate sub-routine
@@ -376,20 +376,26 @@ checkStatus3
     jmp checkEndStatus
 checkEndStatus:
 
+#if DEBUG = 1
+    ; Change background to show how much time does music take for each interrupt
+    lda #1
+    sta $d020
+#endif
+
     ; Play music
     jsr sidtune + 3
-	jsr sidtune + 3
-	jsr sidtune + 3
-	jsr sidtune + 3
-	jsr sidtune + 3
+    jsr sidtune + 3
+    jsr sidtune + 3
+    jsr sidtune + 3
+    jsr sidtune + 3
 
     ; Increase random value
     inc random
 
 #if DEBUG = 1
-	; Change background back again to visally see ISR timing
-	lda #11
-	sta $d020
+    ; Change background back again to visally see ISR timing
+    lda #11
+    sta $d020
 #endif
 
     ; Restore registers from stack
@@ -548,60 +554,60 @@ keybCheckP:
     jmp keybEndCheck
 keybEndCheck:
 
-	; Get joystick status and decide snake direction
-	; Joystick register bits 4:0 => Fire,Right,Left,Down,Up
-	; 0 = Pressed; 1 = Idle
-	lda $dc00			; CIA joystick port 2 register
-	ror					; rotate bit and put bit#0 in CF
-	tax					; store byte value for next key check
-	bcs joyCheckDown	; if CF = 1, then key was not depressed, so skip and check next...
-						; ... else key was depressed!
-	lda direction		; check for not overlapping direction (turn over yourself)
-	cmp #2
-	beq joyEndCheck
-	lda #8
-	sta direction
-	jmp joyEndCheck
+    ; Get joystick status and decide snake direction
+    ; Joystick register bits 4:0 => Fire,Right,Left,Down,Up
+    ; 0 = Pressed; 1 = Idle
+    lda $dc00           ; CIA joystick port 2 register
+    ror                 ; rotate bit and put bit#0 in CF
+    tax                 ; store byte value for next key check
+    bcs joyCheckDown    ; if CF = 1, then key was not depressed, so skip and check next...
+                        ; ... else key was depressed!
+    lda direction       ; check for not overlapping direction (turn over yourself)
+    cmp #2
+    beq joyEndCheck
+    lda #8
+    sta direction
+    jmp joyEndCheck
 joyCheckDown:
-	txa
-	ror
-	tax
-	bcs joyCheckLeft
-	lda direction
-	cmp #8
-	beq joyEndCheck
-	lda #2
-	sta direction
-	jmp joyEndCheck
+    txa
+    ror
+    tax
+    bcs joyCheckLeft
+    lda direction
+    cmp #8
+    beq joyEndCheck
+    lda #2
+    sta direction
+    jmp joyEndCheck
 joyCheckLeft:
-	txa
-	ror
-	tax
-	bcs joyCheckRight
-	lda direction
-	cmp #6
-	beq joyEndCheck
-	lda #4
-	sta direction
-	jmp joyEndCheck
+    txa
+    ror
+    tax
+    bcs joyCheckRight
+    lda direction
+    cmp #6
+    beq joyEndCheck
+    lda #4
+    sta direction
+    jmp joyEndCheck
 joyCheckRight:
-	txa
-	ror
-	tax
-	bcs joyCheckFire
-	lda direction
-	cmp #4
-	beq joyEndCheck
-	lda #6
-	sta direction
-	jmp joyEndCheck
-joyCheckFire:			; `Fire` joystick key used to pause game
-	txa
-	ror
-	tax
-	bcs joyEndCheck
-	lda #5
-	sta direction
+    txa
+    ror
+    tax
+    bcs joyCheckFire
+    lda direction
+    cmp #4
+    beq joyEndCheck
+    lda #6
+    sta direction
+    jmp joyEndCheck
+joyCheckFire:           ; `Fire` joystick key used to pause game
+    txa
+    ror
+    tax
+    bcs joyEndCheck
+    lda #5
+    sta direction
 joyEndCheck:
 
     ; Get direction and move head accordingly
@@ -962,10 +968,10 @@ printIntroEnd:
 
 ; Include
 ; ______________________________________________________________________
-	INCLUDE "multicolor.asm"
+    INCLUDE "multicolor.asm"
 
 #if DEBUG = 1
-	ECHO "Program ends at: ",.
+    ECHO "Program ends at: ",.
 #endif
 ;
 ; coded during december 2017
@@ -973,3 +979,5 @@ printIntroEnd:
 ; this software is free software and is distributed
 ; under the terms of GNU GPL v3 license
 ;
+
+; vim: set expandtab tabstop=4 shiftwidth=4:
