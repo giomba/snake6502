@@ -1,8 +1,20 @@
-64:
-	dasm main.asm -DSYSTEM=64 -DDEBUG=0 -osnake.prg
+.POSIX:
 
-debug:
-	dasm main.asm -DSYSTEM=64 -DDEBUG=1 -ssymbols.txt -osnake.prg
+ASM=$(wildcard src/*.asm)
+RES=$(wildcard res/*)
 
-16:
-	dasm main.asm -DSYSTEM=16 -osnake.prg
+.PHONY: debug env clean
+
+bin/snake.prg: $(ASM) $(RES) | env
+	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=0 -obin/snake.prg
+
+clean:
+	rm -rf {build,bin}
+
+env:
+	mkdir -p {build,bin}
+
+debug: $(ASM) $(RES) | env
+	g++ -o bin/explodefont util/explodefont.cpp
+	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=1 -sbuild/symbols.txt -obin/snake.prg
+

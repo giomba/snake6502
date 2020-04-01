@@ -9,34 +9,35 @@
     ; Commodore16 specific code
 #endif
 
-    ; Uninitialized zeropage segment
+; Uninitialized zeropage segment
+; ----------------------------------------------------------------------
     SEG.U zeropageSegment
     org $02
     INCLUDE "zeropage.asm"
 
-    ; Initialized segments
-    SEG basicSegment
-    org $801
-    INCLUDE "basic.asm"
+#if DEBUG = 1
+    ; Locations $90-$FF in zeropage are used by kernal
+    ECHO "End of zeropage variables. Space left: ",($90 - .)
+#endif
 
+; Initialized segments
+; ----------------------------------------------------------------------
     SEG dataSegment
-    org $900
+    org $801
+    INCLUDE "basic.asm" ; BASIC must stay at this address
     INCLUDE "data.asm"
     INCLUDE "const.asm"
+#if DEBUG = 1
+    ECHO "End of Data + Basic Segment. Space left: ",($1000 - .)
+#endif
 
-; List
-; ----------------------------------------------------------------------
-. = $e00
-listX:
-. = $f00
-listY:
 
 ; SID tune (previously properly cleaned, see HVSC)
 ; ----------------------------------------------------------------------
     SEG sidSegment
     org $1000
 sidtune:
-    INCBIN "amour.sid"
+    INCBIN "../res/amour.sid"
 #if DEBUG = 1
     ECHO "End of SIDtune. Space left: ",($2000 - .)
 #endif
@@ -47,7 +48,7 @@ sidtune:
     org $2000
 ; This binary data that defines the font is exactly 2kB long ($800)
 tggsFont:
-    INCBIN "tggs.font"
+    INCLUDE "tggs.asm"
 
 ; Include program
 ; ----------------------------------------------------------------------
@@ -66,8 +67,20 @@ tggsFont:
     INCLUDE "subroutines.asm"
 
 #if DEBUG = 1
-    ECHO "Program ends at: ",.
+    ECHO "End of program at: ",.,"Space left:",($ce00 - .)
 #endif
+
+#if DEBUG = 1
+    ; +2 because of PRG header
+    ECHO "PRG size:",([. - $801 + 2]d),"dec"
+#endif
+
+; Uninitialized list segment
+; ----------------------------------------------------------------------
+    SEG.U listSegment
+    org $ce00
+listX DS 256
+listY DS 256
 
 ;
 ; coded during december 2017

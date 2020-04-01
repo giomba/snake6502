@@ -7,7 +7,7 @@ ST_INTRO1   =   1
 ST_PLAY     =   2
 ST_OUTRO    =   3
 ST_END      =   4
-ST_PAUSE	=	255
+ST_PAUSE    =	255
 
 ; Screen features
 SCREEN_W    =   40
@@ -17,7 +17,7 @@ SNAKE_TILE  =   81
 SNAKE_COLOR =   13
 ; Food features
 FOOD_TILE   =   90
-FOOD_COLOR  =	11 
+FOOD_COLOR  =	11
 
 ; Strings
 ; ----------------------------------------------------------------------
