@@ -7,7 +7,7 @@ start:
     ; Disable all interrupts
     sei
 
-    ; Turn off CIA interrupts and (eventually) flush the pending queue
+    ; Turn off CIA interrupts and (possibly) flush the pending queue
     ldy #$7f
     sty $dc0d
     sty $dd0d

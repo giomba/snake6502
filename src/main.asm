@@ -37,7 +37,7 @@
     SEG sidSegment
     org $1000
 sidtune:
-    INCBIN "../res/amour.sid"
+    INCBIN "../res.bin/amour.sid"
 #if DEBUG = 1
     ECHO "End of SIDtune. Space left: ",($2000 - .)
 #endif

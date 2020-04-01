@@ -239,13 +239,6 @@ genFoodY:               ; calculate `random` modulo 22 (22 = SCREEN_H - 1)
     cmp snakeY
     beq genFood
 foodOK:
-    ; debug -- print choosen X,Y for food
-    ; ldy #$18
-    ; lda calcTileX
-    ; jsr printByte
-    ; ldy #$1b
-    ; lda calcTileY
-    ; jsr printByte
 
     ldy #0
     jsr calcTileMem     ; calc food address in memory
@@ -277,6 +270,12 @@ checkSelfEat:
     jmp gameover
 checkEndSelfEat:
 
+checkWallHit:
+    cmp #WALL_TILE
+    bne checkEndWallHit
+    jmp gameover
+checkEndWallHit:
+
     ; Draw snake head
     ldy #0
     lda snakeX          ; calc char address in video memory, and put SNAKE_TILE
@@ -306,6 +305,13 @@ checkEndSelfEat:
     jsr calcTileMem
     lda #$20            ; just put a space to erase snake tail tile
     sta (tileMem),y
+
+checkLevel:
+    ; TODO
+    lda #WALL_TILE
+    sta $460
+    lda #WALL_COLOR
+    sta $d860
 
 skipPauseTests:
 
