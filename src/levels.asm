@@ -7,58 +7,72 @@ statusLevelSelect:
     ldy #$04
     sty levelVideoPointer + 1
 
+    ldy #39
+    sty levelColorPointer
+    ldy #$d8
+    sty levelColorPointer + 1
+
 ; Level data is compressed with RLE. Array example:
-; +---+---+---+---+---+-..-+---+---+
-; | T | C | T | C | . |    | 0 | 0 |
-; +---+---+---+---+---+-..-+---+---+
+; +---+---+---+---+---+---+--..--+---+---+---+
+; | T | C | N | T | C | N |  ..  | 0 | 0 | 0 |
+; +---+---+---+---+---+---+--..--+---+---+---+
 ; T tile char
-; C count (how many repeated tile chars)
+; C tile color
+; N count (how many repeated tile chars)
 ; 0 end of level
 
 writeLevelLoop:
-    ; read `T`, and save onto stack
+    ; read `T`
     ldy #0
     lda (levelPointer),y
-    pha
+    sta levelT
 
-    ; increment array pointer
-    lda #levelPointer
-    sta nextPointerPointer
-    ldx #1
-    jsr nextPointer
-
-    ; read `C`, and save onto stack
-    ldy #0
+    ; read `C`
+    iny
     lda (levelPointer),y
-    pha
+    sta levelC
+
+    ; read `N`
+    iny
+    lda (levelPointer),y
+    sta levelN
 
     ; increment array pointer
-    lda #levelPointer
-    sta nextPointerPointer
-    ldx #1
-    jsr nextPointer
-
-    ; retrieve `C` from stack and put in X and Y
-    pla
-    tay
+    iny
+    tya
     tax
-    ; retrieve `T` from stack
-    pla
+    lda #levelPointer
+    sta nextPointerPointer
+    jsr nextPointer
 
-    ; check array end
+    ; check for array end
+    lda levelN
     cmp #0
     beq writeLevelEnd
 
+    ; retrieve `N` and put in Y
+    ldy levelN
+
     ; unpack char from RLE to the screen
 writeLevelElement:
+    lda levelT
     sta (levelVideoPointer),y
+    lda levelC
+    sta (levelColorPointer),y
     dey
     bne writeLevelElement
 
+    ; increment dest video memory pointer
     lda #levelVideoPointer
     sta nextPointerPointer
-    ; reg X is still holding the original `C`
+    ldx levelN
     jsr nextPointer
+
+    lda #levelColorPointer
+    sta nextPointerPointer
+    ldx levelN
+    jsr nextPointer
+
     jmp writeLevelLoop
 
 writeLevelEnd:

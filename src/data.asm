@@ -36,4 +36,11 @@ random:
 status:
     BYTE
 
+; Level temporary vars
+levelT:
+    BYTE
+levelC:
+    BYTE
+levelN:
+    BYTE
 

@@ -4,16 +4,16 @@ using namespace std;
 const int MAXLEN = 64;
 
 void flush(char last, int count) {
-    char tile;
+    char tile, color;
     switch(last) {
         case 'x':
-            tile = (char)91; break;
+            tile = (char)91; color = (char)11; break;
         case 'f':
-            tile = (char)90; break;
+            tile = (char)90; color = (char)11; break;
         default:
             tile = (char)32; break;
     }
-    cout << tile << (char)count;
+    cout << tile << color << (char)count;
 }
 
 int main(int argc, char** argv) {
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
             cin.getline(line, MAXLEN);
             if (line[0] == 'z') {
                 flush(current, count);
-                cout << '\0' << '\0';
+                cout << '\0' << '\0' << '\0';
                 break;
             }
 
@@ -51,6 +51,5 @@ int main(int argc, char** argv) {
             }
         }
     }
-    cout << '\0' << '\0';
 }
 
