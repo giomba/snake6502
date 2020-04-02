@@ -38,8 +38,6 @@ upperbarLoop:
     jsr printStatus
 
     ; Init game variables
-    lda #FOOD_TILE
-    sta $500        ; Put first piece of food
     lda #4
     sta irqn        ; Initialize interrupt divider
     lda #6
@@ -64,6 +62,12 @@ clearListLoop:
     sta listY,x
     cpx #$00
     bne clearListLoop
+
+    ; Set current level pointer to list start
+    lda #<levelsList
+    sta levelPointer
+    lda #>levelsList
+    sta levelPointer + 1
 
     rts
 

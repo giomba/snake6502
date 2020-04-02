@@ -19,11 +19,12 @@ Address               | PRG   | Description
 ```$0000 - $0001```   | no    | hardware
 ```$0002 - $00FF```   | no    | zero page pointers
 ```$0100 - $07FF```   | no    | *free ram*
-```$0800 - $0FFF```   | yes   | data segment + BASIC autostart
+```$0800 - $0FFF```   | yes   | initialized data segment (incl. const) + BASIC autostart
 ```$1000 - $1FFF```   | yes   | SID tune
 ```$2000 - $27FF```   | yes   | custom char
 ```$2800 - $xxxx```   | yes   | program logic (only needed part used)
-```$xxxx - $CDFF```   | no    | *free ram*
+```$xxxx - $CCFF```   | no    | *free ram*
+```$CD00 - $CDFF```   | no    | data segment (not-initialized vars)
 ```$CE00 - $CEFF```   | no    | list X
 ```$CF00 - $CFFF```   | no    | list Y
 ```$D000 - $DFFF```   | no    | I/O

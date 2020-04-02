@@ -75,8 +75,9 @@ intro0end:
     ; Set init variables of the game
     jsr gamereset
 
-    ; Set status as game playing
-    lda #ST_PLAY
+    ; Set status as level select
+    ; (then it will enter in status play)
+    lda #ST_LEVELSELECT
     sta status
 
 endless:
@@ -115,23 +116,28 @@ irq:
     ; Sort of switch-case
     lda status
     cmp #ST_INTRO0
-    bne checkStatus1
+    bne checkStatusIntro1
     jsr statusIntro0
     jmp checkEndStatus
-checkStatus1:
+checkStatusIntro1:
     cmp #ST_INTRO1
-    bne checkStatus2
+    bne checkStatusPlay
     jsr statusIntro1
     jmp checkEndStatus
-checkStatus2
+checkStatusPlay:
     cmp #ST_PLAY
-    bne checkStatus3
+    bne checkStatusOutro
     jsr statusPlay
     jmp checkEndStatus
-checkStatus3
+checkStatusOutro:
     cmp #ST_OUTRO
-    bne checkEndStatus
+    bne checkStatusLevelSelect
     jsr statusOutro
+    jmp checkEndStatus
+checkStatusLevelSelect:
+    cmp #ST_LEVELSELECT
+    bne checkEndStatus
+    jsr statusLevelSelect
     jmp checkEndStatus
 checkEndStatus:
 

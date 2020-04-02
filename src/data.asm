@@ -1,4 +1,4 @@
-; Data section
+; Data section - Not initialized variables ($CD00 - $CDFF)
 ; ----------------------------------------------------------------------
 ; Number of interrupt
 ; Used as counter to be decremented to do some things less frequently
@@ -35,19 +35,5 @@ random:
 ; Status
 status:
     BYTE
-
-; Intro counter
-introCounter:
-    BYTE #$4
-
-; Intro string x position, and next increment
-introX:
-    BYTE #$0
-introXinc:
-    BYTE #$1
-
-; Outro delay
-outroDelay
-    BYTE #$ff
 
 

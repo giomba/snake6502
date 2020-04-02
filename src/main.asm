@@ -22,13 +22,12 @@
 
 ; Initialized segments
 ; ----------------------------------------------------------------------
-    SEG dataSegment
+    SEG constSegment
     org $801
     INCLUDE "basic.asm" ; BASIC must stay at this address
-    INCLUDE "data.asm"
-    INCLUDE "const.asm"
+    INCLUDE "initdata.asm"
 #if DEBUG = 1
-    ECHO "End of Data + Basic Segment. Space left: ",($1000 - .)
+    ECHO "End of Initialized Data (const) + Basic Segment. Space left: ",($1000 - .)
 #endif
 
 
@@ -65,9 +64,10 @@ tggsFont:
     INCLUDE "outro.asm"
     INCLUDE "program.asm"
     INCLUDE "subroutines.asm"
+    INCLUDE "levels.asm"
 
 #if DEBUG = 1
-    ECHO "End of program at: ",.,"Space left:",($ce00 - .)
+    ECHO "End of program at: ",.,"Space left:",($cd00 - .)
 #endif
 
 #if DEBUG = 1
@@ -75,8 +75,19 @@ tggsFont:
     ECHO "PRG size:",([. - $801 + 2]d),"dec"
 #endif
 
-; Uninitialized list segment
+; Uninitialized segments
 ; ----------------------------------------------------------------------
+; Data variables
+; -----------------
+    SEG.U dataSegment
+    org $cd00
+    INCLUDE "data.asm"
+# if DEBUG = 1
+    ECHO "End of Data segment. Space left:",($ce00 - .)
+#endif
+
+; Lists
+; -----------------
     SEG.U listSegment
     org $ce00
 listX DS 256

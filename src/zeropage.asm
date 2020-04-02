@@ -12,6 +12,18 @@ printIntroString DS 2
 ; Pointer to screen position where to print intro string
 introScreenStart DS 2
 
+; Pointer to level struct
+levelPointer DS 2
+
+; Temporary pointer -- Use when you don't call a subroutine
+tempPointer DS 2
+
+; Pointer for Pointer in the NextPointer routine
+nextPointerPointer DS 2
+
+; Pointer to string for strlen routine
+strlenString DS 2
+
 ; Note: Locations $90-$FF in zeropage are used by kernal
 
 

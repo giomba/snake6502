@@ -1,13 +1,32 @@
+; Initialized variables
+; ----------------------------------------------------------------------
+
+; Intro counter
+introCounter:
+    BYTE #$4
+
+; Intro string x position, and next increment
+introX:
+    BYTE #$0
+introXinc:
+    BYTE #$1
+
+; Outro delay
+outroDelay
+    BYTE #$ff
+
+
 ; Costants
 ; ----------------------------------------------------------------------
 
 ; Status of the game (costants pre-processor defined, sort of enum)
-ST_INTRO0   =   0
-ST_INTRO1   =   1
-ST_PLAY     =   2
-ST_OUTRO    =   3
-ST_END      =   4
-ST_PAUSE    =	255
+ST_INTRO0       =   0
+ST_INTRO1       =   1
+ST_LEVELSELECT  =   2
+ST_PLAY         =   3
+ST_OUTRO        =   4
+ST_END          =   5
+ST_PAUSE        =	255
 
 ; Screen features
 SCREEN_W    =   40
@@ -53,4 +72,9 @@ colorshade: ; a gradient of dark-bright-dark (40 columns)
 scoreString:
 	BYTE "POINTS"
 	BYTE #0
+
+; Levels
+; ----------------------------------------------------------------------
+levelsList:
+    INCBIN "../res.bin/levels.bin"
 
