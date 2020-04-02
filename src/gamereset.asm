@@ -4,18 +4,6 @@ gamereset:
     ; Turn MultiColor mode on
     jsr multicolorOn
 
-    ; Clear screen
-    ldx #$00
-    lda #$20
-fullresetCLS:
-    dex
-    sta $400,x
-    sta $500,x
-    sta $600,x
-    sta $700,x
-    cpx #$00
-    bne fullresetCLS
-
     ; Set overscan
     lda #11
     sta $d020

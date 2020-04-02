@@ -132,4 +132,24 @@ printIntroEndCheck:
 printIntroEnd:
     rts
 
+; Increment a pointer in the zeropage
+; Input parameters:
+;   nextPointerPointer  pointer to the pointer in zeropage
+;   regX                value to increment
+nextPointer:
+    lda #0
+    sta nextPointerPointer + 1
+
+    txa
+
+    clc
+    ldy #0
+    adc (nextPointerPointer),y
+    sta (nextPointerPointer),y
+    ldy #1
+    lda (nextPointerPointer),y
+    adc #0
+    sta (nextPointerPointer),y
+
+    rts
 

@@ -14,7 +14,7 @@ clean:
 env:
 	mkdir -p {build,bin,res.bin}
 
-debug: $(ASM) $(RES)
+debug: env $(ASM) $(RES)
 	g++ -o bin/explodefont util/explodefont.cpp
 	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=1 -sbuild/symbols.txt -obin/snake.prg
 

@@ -15,8 +15,8 @@ introScreenStart DS 2
 ; Pointer to level struct
 levelPointer DS 2
 
-; Temporary pointer -- Use when you don't call a subroutine
-tempPointer DS 2
+; Pointer to video memory used in the level loading routine
+levelVideoPointer DS 2
 
 ; Pointer for Pointer in the NextPointer routine
 nextPointerPointer DS 2
