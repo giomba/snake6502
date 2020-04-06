@@ -4,9 +4,6 @@ gamereset:
     ; Turn MultiColor mode on
     jsr multicolorOn
 
-    ; Set overscan
-    lda #11
-    sta $d020
     ; Upper bar -- fill with reversed spaces, color yellow
     ldx #39
 upperbarLoop:

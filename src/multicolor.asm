@@ -37,11 +37,11 @@ multicolorInit:
 ; ----------------------------------------------------------------------
 multicolorOn:
 	; Set colors
-	lda #9
-	sta $d021	; 00 is brown
-	lda #2
-	sta $d022	; 01 is red
-	lda #13
+	lda #$0
+	sta $d021	; 00 is black
+	lda #$a
+	sta $d022	; 01 is gray
+	lda #$d
 	sta $d023	; 10 is green
 				; and of course
 				; 11 is the colour specified in color RAM

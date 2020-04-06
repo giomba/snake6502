@@ -36,10 +36,9 @@ SNAKE_TILE  =   81
 SNAKE_COLOR =   13
 ; Food features
 FOOD_TILE   =   90
-FOOD_COLOR  =	11
+FOOD_COLOR  =   10
 ; Wall features
 WALL_TILE   =   91
-WALL_COLOR  =   11
 
 ; Strings
 ; ----------------------------------------------------------------------
