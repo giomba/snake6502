@@ -6,7 +6,7 @@ RES=res.bin/amour.sid res.bin/levels.bin
 .PHONY: debug env clean
 
 bin/snake.prg: env $(ASM) $(RES)
-	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=0 -obin/snake.prg
+	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=0 -sbuild/symbols.txt -obin/snake.prg
 
 clean:
 	rm -rf {build,bin,res.bin}

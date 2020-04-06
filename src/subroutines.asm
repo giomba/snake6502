@@ -3,7 +3,7 @@
 ; Do some math to calculate tile address in video memory
 ; using x,y coordinates
 ; Formula:  addr = $400 + y * SCREEN_W + x
-calcTileMem:
+calcTileMem SUBROUTINE
     ; Save registers
     pha
     txa
@@ -50,7 +50,7 @@ calcTileEnd:            ; now multiplication is ended, so add X
 ; Print a byte in hexadecimal
 ; A input register for byte to print
 ; Y input register for printing colum (on first line)
-printByte:
+printByte SUBROUTINE
     ; Copy parameter also in X
     tax
 
@@ -70,7 +70,7 @@ printByte:
 
 ; Print null-terminated string on status bar
 ; address of string is given in input using memory location printStatusString
-printStatus:
+printStatus SUBROUTINE
     ldy #0
 printStatusLoop:
     lda (printStatusString),y
@@ -87,37 +87,55 @@ printStatusSkipSpace:
 printStatusEnd:
     rts
 
+printIntro SUBROUTINE
 ; Print string for intro
 ; Input parameters:
 ;   printIntroString    pointer to string to be printed (source)
 ;   introScreenStart    pointer to text video memory on screen where to print (dest)
-printIntro:
     ldy #0
-printIntroLoop:
+.loop:
     lda (printIntroString),y    ; get char from string
-    beq printIntroEnd           ; if zero, then end (string must be null-terminated)
+    beq .end                    ; if zero, then end (string must be null-terminated)
     cmp #$20                    ; is space?
-    bne printIntroCheckPunct
+    bne .checkP1
     lda #$0
-    jmp printIntroEndCheck
-printIntroCheckPunct:
-    cmp #$40                    ; is char greater or equal to #$40 = #64 = `@' ?
-    bcc printIntroEndCheck      ; if not, it is less, thus it must be
-                                ; a full stop, comma, colon or something
-                                ; that actually has the same value in both
-                                ; true ASCII and in PET screen codes
-                                ; otherwise, it is greater than `@`, so must
-                                ; subtract 64 because CBM and its encodings
-                                ; are simply a big shit
-                                ; TODO -- actually must be fixed with new charset
+    jmp .print
+.checkP1:
+    cmp #$28                    ; is char '(' ?
+    bne .checkP2
+    lda #$1b
+    jmp .print
+.checkP2:
+    cmp #$29                    ; is char ')' ?
+    bne .checkP3
+    lda #$1c
+    jmp .print
+.checkP3
+    cmp #$2e                    ; is char '.' ?
+    bne .checkNumber
+    lda #$1d
+    jmp .print
+.checkNumber:                   ; is char a number?
+    cmp #$2f
+    bcc .nextCheck
+    cmp #$3a
+    bcs .nextCheck
+    sec
+    sbc #$30
+    clc
+    adc #$40
+    jmp .print
+.nextCheck:
+
+.isLetter:
+    ; defaults to an uppercase letter of ASCII set
     sec
     sbc #$40
-
-printIntroEndCheck:
+.print:
     sta (introScreenStart),y    ; put screen code to screen
     iny                         ; next char in string
-    jmp printIntroLoop
-printIntroEnd:
+    jmp .loop
+.end:
     rts
 
 ; Increment a pointer in the zeropage
