@@ -58,31 +58,14 @@ printByte:
     lsr
     lsr
     lsr
-    jsr printDigit
+    ora #$40        ; add 64 (see font)
     sta $400,y      ; print msb char
 
     txa             ; Take least significant nibble (use previous copy)
     and #$0f
-    jsr printDigit
-    sta $401,y       ; print lsb char
+    ora #$40        ; add 64 (see font)
+    sta $401,y      ; print lsb char
 
-    rts
-
-; Transform a base-36 digit into a Commodore screen code
-; Leave input digit in accumulator; returns output screen code in accumulator
-printDigit:
-    cmp #10
-    bcs printDigitL     ; if it is not a decimal digit, then go to printDigitL
-    clc                 ; it is a decimal digit! Just add `0` (48)
-    adc #48
-    ora #$80            ; reverse color
-    rts
-printDigitL:            ; it is not a decimal digit, then...
-    sec
-    sbc #10             ; take away 10
-    clc
-    adc #1              ; add 1, so you obtain something in [A-F]
-    ora #$80            ; reverse color
     rts
 
 ; Print null-terminated string on status bar
@@ -94,11 +77,10 @@ printStatusLoop:
     beq printStatusEnd
     cmp #$20
     bne printStatusSkipSpace
-    lda #$60
+    lda #$40 ; space + $40
 printStatusSkipSpace:
     sec
     sbc #$40    ; convert from standard ASCII to Commodore screen code
-    ora #$80    ; reverse color
     sta $413,y
     iny
     jmp printStatusLoop
@@ -114,6 +96,11 @@ printIntro:
 printIntroLoop:
     lda (printIntroString),y    ; get char from string
     beq printIntroEnd           ; if zero, then end (string must be null-terminated)
+    cmp #$20                    ; is space?
+    bne printIntroCheckPunct
+    lda #$0
+    jmp printIntroEndCheck
+printIntroCheckPunct:
     cmp #$40                    ; is char greater or equal to #$40 = #64 = `@' ?
     bcc printIntroEndCheck      ; if not, it is less, thus it must be
                                 ; a full stop, comma, colon or something
@@ -122,6 +109,7 @@ printIntroLoop:
                                 ; otherwise, it is greater than `@`, so must
                                 ; subtract 64 because CBM and its encodings
                                 ; are simply a big shit
+                                ; TODO -- actually must be fixed with new charset
     sec
     sbc #$40
 

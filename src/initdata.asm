@@ -32,13 +32,13 @@ ST_PAUSE        =	255
 SCREEN_W    =   40
 SCREEN_H    =   24
 ; Snake features
-SNAKE_TILE  =   81
+SNAKE_TILE  =   $60
 SNAKE_COLOR =   13
 ; Food features
-FOOD_TILE   =   90
+FOOD_TILE   =   $61
 FOOD_COLOR  =   10
 ; Wall features
-WALL_TILE   =   91
+WALL_TILE   =   $62
 
 ; Strings
 ; ----------------------------------------------------------------------

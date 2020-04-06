@@ -12,8 +12,8 @@ You can also make it output useful extra info with:
 $ make debug
 ```
 
-
-## Memory map
+## Developer docs
+### Memory map
 Address               | PRG   | Description
 ----------------------|-------|------------
 ```$0000 - $0001```   | no    | hardware
@@ -29,4 +29,13 @@ Address               | PRG   | Description
 ```$CF00 - $CFFF```   | no    | list Y
 ```$D000 - $DFFF```   | no    | I/O
 ```$E000 - $FFFF```   | no    | Kernal
+
+### Custom charset
+Index           | Description
+----------------|-------------
+```$00 - $1F``` |   A-Z (space first)
+```$20 - $3F``` |   A-Z, reversed (space first)
+```$40 - $4F``` |   hex digits
+```$50 - $5F``` |   hex digits, reversed
+```$60 -    ``` |   game tiles
 

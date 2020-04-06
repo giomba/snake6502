@@ -252,7 +252,7 @@ foodOK:
     ldy #0
     jsr calcTileMem     ; calc food address in memory
     lda (tileMem),y     ; check if memory is empty
-    cmp #$20            ; is there a space?
+    cmp #$00            ; is there a space?
     bne genFood         ; if not, must generate another number
     lda #FOOD_TILE      ; else, just put that fucking piece of food there
     sta (tileMem),y
@@ -312,7 +312,7 @@ checkEndWallHit:
     lda listY,x
     sta calcTileY
     jsr calcTileMem
-    lda #$20            ; just put a space to erase snake tail tile
+    lda #$00            ; just put a space to erase snake tail tile
     sta (tileMem),y
 
 ;    lda #WALL_COLOR

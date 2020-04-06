@@ -4,10 +4,10 @@ gamereset:
     ; Turn MultiColor mode on
     jsr multicolorOn
 
-    ; Upper bar -- fill with reversed spaces, color yellow
+    ; Upper bar -- fill with spaces, color yellow
     ldx #39
 upperbarLoop:
-    lda #$a0    ; reversed color space
+    lda #$0
     sta $400,x
     lda #7
     sta $d800,x

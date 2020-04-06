@@ -5,7 +5,7 @@ introreset:
 
     ; Clear screen
     ldx #$ff
-    lda #$20
+    lda #$00
 introresetCLS:
     sta $400,x
     sta $500,x

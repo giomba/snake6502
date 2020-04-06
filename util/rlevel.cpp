@@ -7,11 +7,11 @@ void flush(char last, int count) {
     char tile, color;
     switch(last) {
         case 'x':
-            tile = (char)91; color = (char)0x8; break;
+            tile = (char)0x62; color = (char)0x8; break;
         case 'f':
-            tile = (char)90; color = (char)0xa; break;
+            tile = (char)0x61; color = (char)0xa; break;
         default:
-            tile = (char)32; break;
+            tile = (char)0x00; break;
     }
     cout << tile << color << (char)count;
 }
