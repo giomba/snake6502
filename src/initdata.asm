@@ -31,14 +31,26 @@ ST_PAUSE        =	255
 ; Screen features
 SCREEN_W    =   40
 SCREEN_H    =   24
-; Snake features
-SNAKE_TILE  =   $60
-SNAKE_COLOR =   13
-; Food features
-FOOD_TILE   =   $61
-FOOD_COLOR  =   10
-; Wall features
-WALL_TILE   =   $62
+
+; Tiles
+; -----
+EMPTY_TILE  =   $60
+SNAKE_TILE  =   $61
+FOOD_TILE   =   $62
+WALL_TILE   =   $63
+
+; Tiles colors
+; Note: these colors will be picked by the level select routine
+;   thus their order must match those of the values assigned to tiles
+tilesColors:
+EMPTY_COLOR:
+    BYTE $0
+SNAKE_COLOR:
+    BYTE $d
+FOOD_COLOR:
+    BYTE $a
+WALL_COLOR:
+    BYTE $8
 
 ; Strings
 ; ----------------------------------------------------------------------

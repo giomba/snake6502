@@ -13,11 +13,10 @@ statusLevelSelect:
     sty levelColorPointer + 1
 
 ; Level data is compressed with RLE. Array example:
-; +---+---+---+---+---+---+--..--+---+---+---+
-; | T | C | N | T | C | N |  ..  | 0 | 0 | 0 |
-; +---+---+---+---+---+---+--..--+---+---+---+
+; +---+---+---+---+--..--+---+---+
+; | T | N | T | N |  ..  | 0 | 0 |
+; +---+---+---+---+--..--+---+---+
 ; T tile char
-; C tile color
 ; N count (how many repeated tile chars)
 ; 0 end of level
 
@@ -26,11 +25,6 @@ writeLevelLoop:
     ldy #0
     lda (levelPointer),y
     sta levelT
-
-    ; read `C`
-    iny
-    lda (levelPointer),y
-    sta levelC
 
     ; read `N`
     iny
@@ -57,7 +51,12 @@ writeLevelLoop:
 writeLevelElement:
     lda levelT
     sta (levelVideoPointer),y
-    lda levelC
+        ; tiles colors can be found in an array
+        ; position in array = tile value - $60
+    sec
+    sbc #$60
+    tax
+    lda tilesColors,x
     sta (levelColorPointer),y
     dey
     bne writeLevelElement

@@ -252,7 +252,7 @@ foodOK:
     ldy #0
     jsr calcTileMem     ; calc food address in memory
     lda (tileMem),y     ; check if memory is empty
-    cmp #$00            ; is there a space?
+    cmp #EMPTY_TILE     ; is this an empty tile?
     bne genFood         ; if not, must generate another number
     lda #FOOD_TILE      ; else, just put that fucking piece of food there
     sta (tileMem),y
@@ -261,7 +261,7 @@ foodOK:
     clc
     adc tileMem + 1
     sta tileMem + 1
-    lda #FOOD_COLOR
+    lda FOOD_COLOR
     sta (tileMem),y
 
     ; print score at $10th column
@@ -299,7 +299,7 @@ checkEndWallHit:
     clc                 ; correspondent), and put SNAKE_COLOR
     adc tileMem + 1
     sta tileMem + 1
-    lda #SNAKE_COLOR
+    lda SNAKE_COLOR
     sta (tileMem),y
 
     ; Erase snake tail
@@ -312,11 +312,8 @@ checkEndWallHit:
     lda listY,x
     sta calcTileY
     jsr calcTileMem
-    lda #$00            ; just put a space to erase snake tail tile
+    lda #EMPTY_TILE     ; erase snake tail tile
     sta (tileMem),y
-
-;    lda #WALL_COLOR
-;    sta $d860,y
 
 skipPauseTests:
 

@@ -7,13 +7,13 @@ void flush(char last, int count) {
     char tile, color;
     switch(last) {
         case 'x':
-            tile = (char)0x62; color = (char)0x8; break;
+            tile = (char)0x63; break;
         case 'f':
-            tile = (char)0x61; color = (char)0xa; break;
+            tile = (char)0x62; break;
         default:
-            tile = (char)0x00; break;
+            tile = (char)0x60; break;
     }
-    cout << tile << color << (char)count;
+    cout << tile << (char)count;
 }
 
 int main(int argc, char** argv) {
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
             cin.getline(line, MAXLEN);
             if (line[0] == 'z') {
                 flush(current, count);
-                cout << '\0' << '\0' << '\0';
+                cout << '\0' << '\0';
                 break;
             }
 
