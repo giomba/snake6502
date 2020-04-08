@@ -51,5 +51,6 @@ int main(int argc, char** argv) {
             }
         }
     }
+    cout << '\0';
 }
 

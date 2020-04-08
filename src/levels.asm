@@ -14,6 +14,17 @@ statusLevelTitle SUBROUTINE
     sta dstScreenPointer + 1
     jsr printString
 
+    ; if levels are finished, reset list pointer
+    ldy #$0
+    lda (levelPointer),y
+    bne .continue
+
+    lda #<levelsList
+    sta levelPointer
+    lda #>levelsList
+    sta levelPointer + 1
+
+.continue:
     ; Print level Title
     lda levelPointer
     sta srcStringPointer

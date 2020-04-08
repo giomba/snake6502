@@ -86,6 +86,9 @@ colorshade: ; a gradient of dark-bright-dark (40 columns)
 scoreString:
 	BYTE "SCORE      PART"
 	BYTE #0
+noMoreLevelsString:
+    BYTE "NO MORE LEVELS"
+    BYTE #0
 
 ; Levels
 ; ----------------------------------------------------------------------
