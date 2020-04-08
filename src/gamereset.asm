@@ -4,24 +4,6 @@ gamereset:
     ; Turn MultiColor mode on
     jsr multicolorOn
 
-    ; Upper bar -- fill with spaces, color yellow
-    ldx #39
-upperbarLoop:
-    lda #$0
-    sta $400,x
-    lda #7
-    sta $d800,x
-    dex
-    cpx #$ff
-    bne upperbarLoop
-
-    ; Set upper bar text
-    lda #<scoreString
-    sta printStatusString
-    lda #>scoreString
-    sta printStatusString + 1
-    jsr printStatus
-
     ; Init game variables
     lda #4
     sta irqn        ; Initialize interrupt divider

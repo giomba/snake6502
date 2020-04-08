@@ -3,17 +3,7 @@
 introreset:
     jsr multicolorOff
 
-    ; Clear screen
-    ldx #$ff
-    lda #$00
-introresetCLS:
-    sta $400,x
-    sta $500,x
-    sta $600,x
-    sta $700,x
-    dex
-    cpx #$ff
-    bne introresetCLS
+    jsr clearScreen
 
     ; Copy shade colors from costant table to color RAM for 2nd and 4th line of text
     ldx #39

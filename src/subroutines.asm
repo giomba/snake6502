@@ -1,5 +1,24 @@
 ; Subroutines
 ; ----------------------------------------------------------------------
+
+; Clear screen -- easy
+clearScreen SUBROUTINE
+    ldx #$ff
+.loop:
+    lda #$00
+    sta $400,x
+    sta $500,x
+    sta $600,x
+    sta $700,x
+    lda #$05
+    sta $d800,x
+    sta $d900,x
+    sta $da00,x
+    sta $db00,x
+    dex
+    cpx #$ff
+    bne .loop
+
 ; Do some math to calculate tile address in video memory
 ; using x,y coordinates
 ; Formula:  addr = $400 + y * SCREEN_W + x
@@ -92,6 +111,8 @@ printIntro SUBROUTINE
 ; Input parameters:
 ;   printIntroString    pointer to string to be printed (source)
 ;   introScreenStart    pointer to text video memory on screen where to print (dest)
+; Output results:
+;   Y                   leaves string length in reg Y
     ldy #0
 .loop:
     lda (printIntroString),y    ; get char from string

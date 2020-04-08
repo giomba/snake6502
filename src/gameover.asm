@@ -9,8 +9,10 @@ gameover:
 
     ; Set gameover and outro status
     lda #$ff
-    sta outroDelay
-    lda #ST_OUTRO
+    sta delay
+    lda #ST_END
+    sta delayStatus
+    lda #ST_DELAY
     sta status
     rts
 

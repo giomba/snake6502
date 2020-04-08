@@ -42,3 +42,7 @@ levelT:
 levelN:
     BYTE
 
+; next status after delay
+delayStatus:
+    BYTE
+

@@ -11,10 +11,9 @@ introX:
 introXinc:
     BYTE #$1
 
-; Outro delay
-outroDelay
+; Delay
+delay:
     BYTE #$ff
-
 
 ; Costants
 ; ----------------------------------------------------------------------
@@ -22,10 +21,11 @@ outroDelay
 ; Status of the game (costants pre-processor defined, sort of enum)
 ST_INTRO0       =   0
 ST_INTRO1       =   1
-ST_LEVELSELECT  =   2
-ST_PLAY         =   3
-ST_OUTRO        =   4
-ST_END          =   5
+ST_LEVEL_TITLE  =   2
+ST_LEVEL_LOAD   =   3
+ST_PLAY         =   4
+ST_DELAY        =   5
+ST_END          =   6
 ST_PAUSE        =	255
 
 ; Screen features
@@ -77,6 +77,9 @@ intro3string:
 #else
     BYTE "(C) 2018"
 #endif
+    BYTE #0
+levelIntroString:
+    BYTE "NEXT LEVEL"
     BYTE #0
 colorshade: ; a gradient of dark-bright-dark (40 columns)
 	HEX 0b 0b 0b 0b 0b 0c 0c 0c 0c 0c 05 05 05 0d 0d 0d 0d 07 07 07 07 07 07 0d 0d 0d 0d 05 05 05 0c 0c 0c 0c 0c 0b 0b 0b 0b 0b

@@ -69,15 +69,12 @@ intro0running:              ; Cycle here until SPACE or `Q` is pressed
 
     ; Intro is finished, now it's time to start the proper game
 intro0end:
-    ; Pause everything in interrupt
-    lda #ST_PAUSE
-    sta status
     ; Set init variables of the game
     jsr gamereset
 
     ; Set status as level select
     ; (then it will enter in status play)
-    lda #ST_LEVELSELECT
+    lda #ST_LEVEL_TITLE
     sta status
 
 endless:
@@ -126,18 +123,23 @@ checkStatusIntro1:
     jmp checkEndStatus
 checkStatusPlay:
     cmp #ST_PLAY
-    bne checkStatusOutro
+    bne checkStatusDelay
     jsr statusPlay
     jmp checkEndStatus
-checkStatusOutro:
-    cmp #ST_OUTRO
-    bne checkStatusLevelSelect
-    jsr statusOutro
+checkStatusDelay:
+    cmp #ST_DELAY
+    bne checkStatusLevelTitle
+    jsr statusDelay
     jmp checkEndStatus
-checkStatusLevelSelect:
-    cmp #ST_LEVELSELECT
+checkStatusLevelTitle:
+    cmp #ST_LEVEL_TITLE
+    bne checkStatusLevelLoad
+    jsr statusLevelTitle
+    jmp checkEndStatus
+checkStatusLevelLoad:
+    cmp #ST_LEVEL_LOAD
     bne checkEndStatus
-    jsr statusLevelSelect
+    jsr statusLevelLoad
     jmp checkEndStatus
 checkEndStatus:
 

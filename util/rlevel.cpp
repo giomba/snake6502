@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     while (true) {
         cin.getline(line, MAXLEN);
         if (line[0] == 'Z') break;
-        // cout << line << '\0';   /* the title */
+        cout << line << '\0';   /* the title */
         int count = 0;
 
         char last = '\0';

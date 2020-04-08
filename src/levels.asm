@@ -1,5 +1,66 @@
 ; load new level on the screen
-statusLevelSelect:
+statusLevelTitle SUBROUTINE
+    jsr clearScreen
+
+.back:
+    ; Print "Next Level"
+    lda #<levelIntroString
+    sta printIntroString
+    lda #>levelIntroString
+    sta printIntroString + 1
+
+    lda #$00
+    sta introScreenStart
+    lda #$04
+    sta introScreenStart + 1
+    jsr printIntro
+
+    ; Print level Title
+    lda levelPointer
+    sta printIntroString
+    lda levelPointer + 1
+    sta printIntroString + 1
+
+    lda #$e2
+    sta introScreenStart
+    lda #$05
+    sta introScreenStart + 1
+    jsr printIntro
+
+    ; advance level pointer, based on title string length
+    iny
+    tya
+    tax
+    lda #levelPointer
+    sta nextPointerPointer
+    jsr nextPointer
+
+    ; wait
+    lda #ST_LEVEL_LOAD
+    sta delayStatus
+    lda #ST_DELAY
+    sta status
+    rts
+
+statusLevelLoad SUBROUTINE
+    ; Upper bar -- fill with spaces, color yellow
+    ldx #39
+upperbarLoop:
+    lda #$0
+    sta $400,x
+    lda #7
+    sta $d800,x
+    dex
+    cpx #$ff
+    bne upperbarLoop
+
+    ; Set upper bar text
+    lda #<scoreString
+    sta printStatusString
+    lda #>scoreString
+    sta printStatusString + 1
+    jsr printStatus
+
     ; initialize video pointer with first video memory address
     ; (skip first line, used for the status bar)
     ldy #39
