@@ -4,27 +4,27 @@ statusLevelTitle SUBROUTINE
 
     ; Print "Next Level"
     lda #<levelIntroString
-    sta printIntroString
+    sta srcStringPointer
     lda #>levelIntroString
-    sta printIntroString + 1
+    sta srcStringPointer + 1
 
     lda #$00
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$04
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; Print level Title
     lda levelPointer
-    sta printIntroString
+    sta srcStringPointer
     lda levelPointer + 1
-    sta printIntroString + 1
+    sta srcStringPointer + 1
 
     lda #$e2
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$05
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; advance level pointer, based on title string length
     iny
@@ -55,14 +55,14 @@ statusLevelLoad SUBROUTINE
 
     ; Set upper bar score/part text
     lda #<scoreString
-    sta printIntroString
+    sta srcStringPointer
     lda #>scoreString
-    sta printIntroString + 1
+    sta srcStringPointer + 1
     lda #$14
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$04
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; Set score
     ldy #26

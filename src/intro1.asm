@@ -42,23 +42,23 @@ status1setSX:
 status1okset:
     ; Print "SNAKE BY GIOMBA" (see above for pointer details)
     lda #<intro0string
-    sta printIntroString
+    sta srcStringPointer
     lda #>intro0string
-    sta printIntroString + 1
+    sta srcStringPointer + 1
     ; $0428 is 2nd line (previously filled with color shades by reset routine)
     lda #$28
     clc
     adc introX                  ; just add X, to make it look like it has moved
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$04
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; Print "PRESS SPACE TO PLAY"
     lda #<intro1string
-    sta printIntroString
+    sta srcStringPointer
     lda #>intro1string
-    sta printIntroString + 1
+    sta srcStringPointer + 1
     ; $0478 is 4th line (previously filled with color shades by reset routine)
     ; add #19, then sub introX will make it move to other way of 2nd line
     lda #$78
@@ -66,10 +66,10 @@ status1okset:
     adc #19         ; add #19
     sec
     sbc introX      ; sub introX
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$04
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; Some considerations on speed:
     ; yes, maybe I should have put the string chars once in screen text memory

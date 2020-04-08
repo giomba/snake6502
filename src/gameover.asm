@@ -2,15 +2,15 @@
 ; ----------------------------------------------------------------------
 gameover:
     lda #<gameoverString
-    sta printIntroString
+    sta srcStringPointer
     lda #>gameoverString
-    sta printIntroString + 1
+    sta srcStringPointer + 1
 
     lda #$00
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$04
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     ; Set gameover and outro status
     lda #$ff

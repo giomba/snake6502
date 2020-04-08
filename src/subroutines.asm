@@ -87,16 +87,16 @@ printByte SUBROUTINE
 
     rts
 
-printIntro SUBROUTINE
-; Print string for intro
+printString SUBROUTINE
+; Print string
 ; Input parameters:
-;   printIntroString    pointer to string to be printed (source)
-;   introScreenStart    pointer to text video memory on screen where to print (dest)
+;   srcStringPointer    pointer to string to be printed (source)
+;   dstScreenPointer    pointer to text video memory on screen where to print (dest)
 ; Output results:
 ;   Y                   leaves string length in reg Y
     ldy #0
 .loop:
-    lda (printIntroString),y    ; get char from string
+    lda (srcStringPointer),y    ; get char from string
     beq .end                    ; if zero, then end (string must be null-terminated)
     cmp #$20                    ; is space?
     bne .checkP1
@@ -134,7 +134,7 @@ printIntro SUBROUTINE
     sec
     sbc #$40
 .print:
-    sta (introScreenStart),y    ; put screen code to screen
+    sta (dstScreenPointer),y    ; put screen code to screen
     iny                         ; next char in string
     jmp .loop
 .end:

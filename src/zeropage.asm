@@ -5,9 +5,9 @@
 tileMem DS 2
 
 ; Pointer to string
-printIntroString DS 2
+srcStringPointer DS 2
 ; Pointer to screen position where to print intro string
-introScreenStart DS 2
+dstScreenPointer DS 2
 
 ; Pointer to level struct
 levelPointer DS 2

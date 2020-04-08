@@ -22,25 +22,25 @@ introresetColorShade
 
     ; Print website
     lda #<intro2string          ; lsb of string address
-    sta printIntroString        ; put into lsb of source pointer
+    sta srcStringPointer        ; put into lsb of source pointer
     lda #>intro2string          ; do the same for msb of string address
-    sta printIntroString + 1    ; put into msb of source pointer
+    sta srcStringPointer + 1    ; put into msb of source pointer
     lda #$26                    ; this is lsb of address of 20th line
-    sta introScreenStart        ; put into lsb of dest pointer
+    sta dstScreenPointer        ; put into lsb of dest pointer
     lda #$07                    ; do the same for msb of adress of 20th line
-    sta introScreenStart + 1    ; put into msb of dest pointer
-    jsr printIntro              ; print
+    sta dstScreenPointer + 1    ; put into msb of dest pointer
+    jsr printString              ; print
 
     ; Print Copyright
     lda #<intro3string          ; the assembly is the same as above,
-    sta printIntroString        ; just change string to be printed
+    sta srcStringPointer        ; just change string to be printed
     lda #>intro3string          ; and line (21th line)
-    sta printIntroString + 1
+    sta srcStringPointer + 1
     lda #$58
-    sta introScreenStart
+    sta dstScreenPointer
     lda #$07
-    sta introScreenStart + 1
-    jsr printIntro
+    sta dstScreenPointer + 1
+    jsr printString
 
     rts
 
