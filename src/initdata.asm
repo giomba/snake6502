@@ -84,7 +84,7 @@ levelIntroString:
 colorshade: ; a gradient of dark-bright-dark (40 columns)
 	HEX 0b 0b 0b 0b 0b 0c 0c 0c 0c 0c 05 05 05 0d 0d 0d 0d 07 07 07 07 07 07 0d 0d 0d 0d 05 05 05 0c 0c 0c 0c 0c 0b 0b 0b 0b 0b
 scoreString:
-	BYTE "POINTS"
+	BYTE "SCORE      PART"
 	BYTE #0
 
 ; Levels

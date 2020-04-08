@@ -57,7 +57,7 @@ tggsFont:
 
     INCLUDE "game.asm"
     INCLUDE "gameover.asm"
-    INCLUDE "gamereset.asm"
+    INCLUDE "levelreset.asm"
     INCLUDE "introreset.asm"
     INCLUDE "intro1.asm"
     INCLUDE "multicolor.asm"

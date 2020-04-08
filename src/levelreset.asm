@@ -1,6 +1,6 @@
-; Full game reset
+; Reset variables for a new level
 ; ----------------------------------------------------------------------
-gamereset:
+levelresetvar:
     ; Turn MultiColor mode on
     jsr multicolorOn
 
@@ -29,12 +29,6 @@ clearListLoop:
     sta listY,x
     cpx #$00
     bne clearListLoop
-
-    ; Set current level pointer to list start
-    lda #<levelsList
-    sta levelPointer
-    lda #>levelsList
-    sta levelPointer + 1
 
     rts
 

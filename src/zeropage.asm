@@ -4,10 +4,7 @@
 ; using pointer at tileMem,tileMem+1
 tileMem DS 2
 
-; Pointer to status string
-printStatusString DS 2
-
-; Pointer to intro string
+; Pointer to string
 printIntroString DS 2
 ; Pointer to screen position where to print intro string
 introScreenStart DS 2

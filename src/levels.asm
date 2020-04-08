@@ -2,7 +2,6 @@
 statusLevelTitle SUBROUTINE
     jsr clearScreen
 
-.back:
     ; Print "Next Level"
     lda #<levelIntroString
     sta printIntroString
@@ -45,21 +44,33 @@ statusLevelTitle SUBROUTINE
 statusLevelLoad SUBROUTINE
     ; Upper bar -- fill with spaces, color yellow
     ldx #39
-upperbarLoop:
+.loop:
     lda #$0
     sta $400,x
     lda #7
     sta $d800,x
     dex
     cpx #$ff
-    bne upperbarLoop
+    bne .loop
 
-    ; Set upper bar text
+    ; Set upper bar score/part text
     lda #<scoreString
-    sta printStatusString
+    sta printIntroString
     lda #>scoreString
-    sta printStatusString + 1
-    jsr printStatus
+    sta printIntroString + 1
+    lda #$14
+    sta introScreenStart
+    lda #$04
+    sta introScreenStart + 1
+    jsr printIntro
+
+    ; Set score
+    ldy #26
+    lda score + 1
+    jsr printByte
+    ldy #28
+    lda score
+    jsr printByte
 
     ; initialize video pointer with first video memory address
     ; (skip first line, used for the status bar)

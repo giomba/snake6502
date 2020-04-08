@@ -69,8 +69,19 @@ intro0running:              ; Cycle here until SPACE or `Q` is pressed
 
     ; Intro is finished, now it's time to start the proper game
 intro0end:
-    ; Set init variables of the game
-    jsr gamereset
+    ; Set current level pointer to list start
+    lda #<levelsList
+    sta levelPointer
+    lda #>levelsList
+    sta levelPointer + 1
+
+    ; clear score
+    lda #$00
+    sta score
+    sta score + 1
+
+    ; Set init variables of the level
+    jsr levelresetvar
 
     ; Set status as level select
     ; (then it will enter in status play)

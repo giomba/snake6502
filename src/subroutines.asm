@@ -87,25 +87,6 @@ printByte SUBROUTINE
 
     rts
 
-; Print null-terminated string on status bar
-; address of string is given in input using memory location printStatusString
-printStatus SUBROUTINE
-    ldy #0
-printStatusLoop:
-    lda (printStatusString),y
-    beq printStatusEnd
-    cmp #$20
-    bne printStatusSkipSpace
-    lda #$40 ; space + $40
-printStatusSkipSpace:
-    sec
-    sbc #$40    ; convert from standard ASCII to Commodore screen code
-    sta $413,y
-    iny
-    jmp printStatusLoop
-printStatusEnd:
-    rts
-
 printIntro SUBROUTINE
 ; Print string for intro
 ; Input parameters:

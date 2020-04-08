@@ -203,9 +203,24 @@ overEndCheck:
     beq foodEaten       ; if memory does contain food, then perform foodEaten actions,
     jmp checkSelfEat    ; else just loooong jump to test if I ate myself
 foodEaten:
-    ldx length          ; else, increment snake length,
+    ldx length          ; else, increment snake length
     inx
     stx length
+
+    cpx #$10            ; check if level is finished
+    bne genFood         ; if not, skip
+    clc
+    lda score           ; else increment total score
+    adc length
+    sta score
+    lda score + 1
+    adc #$0
+    sta score + 1
+    jsr levelresetvar   ; reset vars and go to next level
+    lda #ST_LEVEL_TITLE
+    sta status
+    rts
+
 genFood:
     ldx random
     inx
@@ -241,10 +256,10 @@ genFoodY:               ; calculate `random` modulo 22 (22 = SCREEN_H - 1)
 foodOK:
 #if DEBUG = 1
     ; print choosen X,Y for food
-    ldy #$18
+    ldy #14
     lda calcTileX
     jsr printByte
-    ldy #$1b
+    ldy #17
     lda calcTileY
     jsr printByte
 #endif
@@ -264,8 +279,8 @@ foodOK:
     lda FOOD_COLOR
     sta (tileMem),y
 
-    ; print score at $10th column
-    ldy #$10
+    ; print partial
+    ldy #36
     lda length
     jsr printByte
 

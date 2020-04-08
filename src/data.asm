@@ -46,3 +46,7 @@ levelN:
 delayStatus:
     BYTE
 
+; Total score of the game
+score:
+    WORD
+
