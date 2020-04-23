@@ -1,6 +1,5 @@
 bin/
 build/
 res.bin/
-*.prg
 *.out
 symbols.txt
