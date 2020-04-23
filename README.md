@@ -6,6 +6,8 @@
 
 Download the [binary .prg](dist/snake.prg).
 
+Current development status [here](https://git.giomba.it/giomba/snake6502).
+
 ## Compile
 You need the GNU compiler collection and the [dasm](https://dasm-assembler.github.io/) macro assembler, then:
 ```
