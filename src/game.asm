@@ -207,7 +207,7 @@ foodEaten:
     inx
     stx length
 
-    cpx #$40            ; check if level is finished
+    cpx #$0a            ; check if level is finished
     bne genFood         ; if not, skip
     clc
     lda score           ; else increment total score

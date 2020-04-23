@@ -1,9 +1,11 @@
 # snake6502
 
+![Gameplay screenshot](scrot/gameplay.png)
+
 *snake6502* is a snake-like game clone for Commodore home computers, written for fun because «I always wanted to code something for a computer of my retrocomputers collection – actually, this is the main reason I collect them: to write programs».
 
 ## Compile
-You need the [dasm](https://dasm-assembler.github.io/) macro assembler, then:
+You need the GNU compiler collection and the [dasm](https://dasm-assembler.github.io/) macro assembler, then:
 ```
 $ make
 ```
