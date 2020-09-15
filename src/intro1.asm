@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Currently statusIntro0 is the same as statusIntro1
 ; statusIntro1 has just been reserved for future use
 statusIntro0:
@@ -77,4 +81,6 @@ status1okset:
     ; For now, just return.
     rts
 
-
+#if VERBOSE = 1
+    ECHO "intro1.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

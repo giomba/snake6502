@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; ENTRY OF PROGRAM
 ; ----------------------------------------------------------------------
 start:
@@ -186,4 +190,6 @@ checkEndStatus:
     ; Go to original system routine
     jmp $ea31
 
-
+#if VERBOSE = 1
+    ECHO "program.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

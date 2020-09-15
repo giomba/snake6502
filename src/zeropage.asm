@@ -22,6 +22,10 @@ nextPointerPointer DS 2
 ; Pointer to string for strlen routine
 strlenString DS 2
 
+; Generic src/dst copy pointers
+srcPointer DS 2
+dstPointer DS 2
+
 ; Note: Locations $90-$FF in zeropage are used by kernal
 
 

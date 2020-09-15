@@ -3,10 +3,16 @@
 ASM=$(wildcard src/*.asm)
 RES=res.bin/amour.sid res.bin/levels.bin
 
+ifeq "$(CARTRIDGE)" "1"
+	FORMAT:=3
+else
+	FORMAT:=1
+endif
+
 .PHONY: debug env clean
 
-bin/snake.prg: env $(ASM) $(RES)
-	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=0 -sbuild/symbols.txt -obin/snake.prg
+bin/snake.prg: env $(ASM) $(RES) bin/explodefont
+	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=$(DEBUG) -DVERBOSE=$(VERBOSE) -DCARTRIDGE=$(CARTRIDGE) -f$(FORMAT) -sbuild/symbols.txt -obin/snake.prg
 
 clean:
 	rm -rf {build,bin,res.bin}
@@ -14,9 +20,8 @@ clean:
 env:
 	mkdir -p {build,bin,res.bin}
 
-debug: env $(ASM) $(RES)
+bin/explodefont: util/explodefont.cpp
 	g++ -o bin/explodefont util/explodefont.cpp
-	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=1 -sbuild/symbols.txt -obin/snake.prg
 
 res.bin/amour.sid:
 	cp res.org/amour.sid res.bin/amour.sid

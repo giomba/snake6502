@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Wait for some delay
 statusDelay SUBROUTINE
     ldy delay           ; load outroDelay and decrement
@@ -11,3 +15,6 @@ statusDelay SUBROUTINE
     sta status
     rts
 
+#if VERBOSE = 1
+    ECHO "outro.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

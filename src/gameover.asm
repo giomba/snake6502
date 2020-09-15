@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Game is over
 ; ----------------------------------------------------------------------
 gameover:
@@ -21,4 +25,6 @@ gameover:
     sta status
     rts
 
-
+#if VERBOSE = 1
+    ECHO "gameover.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

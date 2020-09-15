@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; char 0x0, 0
    BYTE #%00000000
    BYTE #%00000000
@@ -2558,3 +2562,7 @@
    BYTE #%11100001
    BYTE #%01010101
    BYTE #%00000000
+
+#if VERBOSE = 1
+    ECHO "tggs.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Intro reset
 ; ----------------------------------------------------------------------
 introreset:
@@ -44,4 +48,6 @@ introresetColorShade
 
     rts
 
-
+#if VERBOSE = 1
+    ECHO "introreset.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

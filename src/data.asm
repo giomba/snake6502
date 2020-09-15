@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Data section - Not initialized variables ($CD00 - $CDFF)
 ; ----------------------------------------------------------------------
 ; Number of interrupt
@@ -50,3 +54,6 @@ delayStatus:
 score:
     WORD
 
+#if VERBOSE = 1
+    ECHO "data.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

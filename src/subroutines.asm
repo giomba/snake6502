@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Subroutines
 ; ----------------------------------------------------------------------
 
@@ -161,3 +165,6 @@ nextPointer:
 
     rts
 
+#if VERBOSE = 1
+    ECHO "subroutines.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

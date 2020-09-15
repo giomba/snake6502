@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; Initialized variables
 ; ----------------------------------------------------------------------
 
@@ -95,3 +99,6 @@ noMoreLevelsString:
 levelsList:
     INCBIN "../res.bin/levels.bin"
 
+#if VERBOSE = 1
+    ECHO "initdata.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

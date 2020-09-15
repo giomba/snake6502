@@ -15,21 +15,38 @@
     org $02
     INCLUDE "zeropage.asm"
 
-#if DEBUG = 1
+#if VERBOSE = 1
     ; Locations $90-$FF in zeropage are used by kernal
     ECHO "End of zeropage variables. Space left: ",($90 - .)
 #endif
 
 ; Initialized segments
 ; ----------------------------------------------------------------------
-    SEG constSegment
+    SEG autostartSegment
+#if CARTRIDGE = 0
     org $801
-    INCLUDE "basic.asm" ; BASIC must stay at this address
-    INCLUDE "initdata.asm"
-#if DEBUG = 1
-    ECHO "End of Initialized Data (const) + Basic Segment. Space left: ",($1000 - .)
+    INCLUDE "basic.asm" ; BASIC _MUST_ stay at this address
+#else
+    org $800
+    INCLUDE "cart.asm"
 #endif
+    INCLUDE "initdata.asm"
 
+; Program "Segment" Low
+; ----------------------------------------------------------------------
+; You just have to fill this empty space, don't you think so? ;-)
+    INCLUDE "game.asm"
+    INCLUDE "gameover.asm"
+    INCLUDE "introreset.asm"
+    INCLUDE "program.asm"
+    INCLUDE "subroutines.asm"
+    INCLUDE "levels.asm"
+    INCLUDE "intro1.asm"
+; Note: some code had to be included at an higher address
+
+#if VERBOSE = 1
+    ECHO "End of Low Program Segment. Space left:",($1000 - .)
+#endif
 
 ; SID tune (previously properly cleaned, see HVSC)
 ; ----------------------------------------------------------------------
@@ -37,8 +54,14 @@
     org $1000
 sidtune:
     INCBIN "../res.bin/amour.sid"
-#if DEBUG = 1
-    ECHO "End of SIDtune. Space left: ",($2000 - .)
+#if VERBOSE = 1
+    ECHO "End of SIDtune at ",.
+#endif
+    INCLUDE "multicolor.asm"
+    INCLUDE "levelreset.asm"
+    INCLUDE "outro.asm"
+#if VERBOSE = 1
+    ECHO "End of Middle Program Segment. Space left:",($2000 - .)
 #endif
 
 ; Font Data
@@ -49,40 +72,36 @@ sidtune:
 tggsFont:
     INCLUDE "tggs.asm"
 
-; Include program
+; Program Segment High
 ; ----------------------------------------------------------------------
-    SEG programSegment
-    org $2800
-    jmp start
 
-    INCLUDE "game.asm"
-    INCLUDE "gameover.asm"
-    INCLUDE "levelreset.asm"
-    INCLUDE "introreset.asm"
-    INCLUDE "intro1.asm"
-    INCLUDE "multicolor.asm"
-    INCLUDE "outro.asm"
-    INCLUDE "program.asm"
-    INCLUDE "subroutines.asm"
-    INCLUDE "levels.asm"
-
-#if DEBUG = 1
-    ECHO "End of program at: ",.,"Space left:",($cd00 - .)
+#if VERBOSE = 1
+    ECHO "End of High Program Segment at: ",.,"Space left:",($cd00 - .)
 #endif
 
-#if DEBUG = 1
+#if VERBOSE = 1
+#if CARTRIDGE = 0
     ; +2 because of PRG header
     ECHO "PRG size:",([. - $801 + 2]d),"dec"
+#else
+    ECHO "BIN size:",([. - $800]d),"dec"
+#endif
 #endif
 
 ; Uninitialized segments
 ; ----------------------------------------------------------------------
+; Cartridge locations
+; -------------------
+    SEG.U cartridgeSegment
+    org $8000
+cartridgeStart:
+
 ; Data variables
 ; -----------------
     SEG.U dataSegment
     org $cd00
     INCLUDE "data.asm"
-# if DEBUG = 1
+#if VERBOSE = 1
     ECHO "End of Data segment. Space left:",($ce00 - .)
 #endif
 

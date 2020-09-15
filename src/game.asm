@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 statusPlay:     ; do Game
     ; Check counter
     ldx irqn
@@ -334,4 +338,6 @@ skipPauseTests:
 
     rts
 
-
+#if VERBOSE = 1
+    ECHO "game.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

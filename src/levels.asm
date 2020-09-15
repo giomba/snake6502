@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 ; load new level on the screen
 statusLevelTitle SUBROUTINE
     jsr clearScreen
@@ -162,3 +166,6 @@ writeLevelEnd:
     sta status
     rts
 
+#if VERBOSE = 1
+    ECHO "levels.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif

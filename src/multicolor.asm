@@ -1,3 +1,7 @@
+#if VERBOSE = 1
+LASTINIT SET .
+#endif
+
 		processor 6502
 
 multicolor SUBROUTINE
@@ -39,3 +43,7 @@ multicolorOff:
 	and #$ef
 	sta $d016
 	rts
+
+#if VERBOSE = 1
+    ECHO "multicolor.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+#endif
