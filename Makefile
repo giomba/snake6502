@@ -6,7 +6,7 @@ RES=res.bin/amour.sid res.bin/levels.bin res.bin/unlzg.bin
 .PHONY: debug env clean
 
 bin/snake.bin: bin/snake.pack.lz
-	dasm src/cart.asm -DVERBOSE=$(VERBOSE) -f3 -sbuild/cart.symbols.txt -obin/snake.bin
+	dasm src/cart.asm -Isrc/ -DVERBOSE=$(VERBOSE) -f3 -sbuild/cart.symbols.txt -obin/snake.bin
 
 bin/snake.pack: env $(ASM) $(RES) bin/explodefont
 	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=$(DEBUG) -DVERBOSE=$(VERBOSE) -DCARTRIDGE=$(CARTRIDGE) -f3 -sbuild/pack.symbols.txt -obin/snake.pack

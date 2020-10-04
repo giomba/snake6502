@@ -1,5 +1,9 @@
     processor 6502
 
+    SEG.U zeropageSegment
+    org $02
+    INCLUDE "zeropage.asm"
+
     SEG cartridgeSegment
     org $8000
 
@@ -9,12 +13,6 @@ cartridge SUBROUTINE
 
     ; CBM80 in PETSCII (cartridge signature for autostart)
     BYTE #$c3,#$c2,#$cd,#$38,#$30
-
-.unlzg:
-    INCBIN "res.bin/unlzg.bin"
-
-.lzpack:
-    INCBIN "bin/snake.pack.lz"
 
 .coldstart:
     sei
@@ -28,20 +26,26 @@ cartridge SUBROUTINE
 .warmstart:
     ; address of input compressed data
     lda #<.lzpack
-    sta 26
+    sta srcPointer
     lda #>.lzpack
-    sta 27
+    sta srcPointer + 1
 
     ; address of output decompressed data
     lda #$00
-    sta 28
+    sta dstPointer
     lda #$10
-    sta 29
-    jsr .unlzg
+    sta dstPointer + 1
+    jsr inflate
 
     ; jump to program entry
     jmp $2800
 
+    ; compressed pack
+.lzpack:
+    INCBIN "bin/snake.pack.lz"
+
+    ; decompression util
+    INCLUDE "lzgmini.asm"
 
 #if VERBOSE = 1
     ECHO "8k CARTRIDGE SIZE:",(. - $8000),"=",[(. - $8000)d]
