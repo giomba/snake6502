@@ -1,0 +1,3 @@
+[submodule "liblzg"]
+	path = liblzg
+	url = https://github.com/mbitsnbites/liblzg.git

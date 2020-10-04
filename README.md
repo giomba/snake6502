@@ -19,19 +19,25 @@ You can also define the following environment variables:
 
 ```$ VERBOSE=1 make```      output useful info during compilation
 
-```$ CARTRIDGE=1 make```    produces an 8K bin ready to be burnt to an *PROM
-
 ## Developer docs
+### Package
+The whole program is assembled into a ```snake.pack``` binary blob with the following structure.
+
+Absolute    | Offset      | Description
+------------|-------------|------------
+```$1000``` | ```$0000``` | load address
+```$2800``` | ```$1800``` | entry point (start address)
+
 ### Memory map
 Address               | PRG   | Description
 ----------------------|-------|------------
 ```$0000 - $0001```   | no    | hardware
 ```$0002 - $00FF```   | no    | zero page pointers
-```$0100 - $07FF```   | no    | *free ram*
-```$0800 - $0FFF```   | yes   | autostart (BASIC or cartridge) + Low Program Segment
-```$1000 - $1FFF```   | yes   | SID tune + Middle Program Segment
+```$0100 - $01FF```   | no    | stack page
+```$0200 - $07FF```   | no    | *free ram*
+```$1000 - $1FFF```   | yes   | SID tune
 ```$2000 - $27FF```   | yes   | custom char
-```$2800 - $xxxx```   | yes   | High Program Segment (only needed part used)
+```$2800 - $xxxx```   | yes   | Program segment (only needed part used)
 ```$xxxx - $CCFF```   | no    | *free ram*
 ```$CD00 - $CDFF```   | no    | data segment (not-initialized vars)
 ```$CE00 - $CEFF```   | no    | list X
@@ -39,9 +45,14 @@ Address               | PRG   | Description
 ```$D000 - $DFFF```   | no    | I/O
 ```$E000 - $FFFF```   | no    | Kernal
 
-Note: program (code) segments have been put in all possible free spots in order to squeeze the game into an 8K cartridge.
+### Compression
+```snake.pack``` is compressed into ```snake.pack.lz``` using [liblzg](https://github.com/mbitsnbites/liblzg), to save space in order to fit the game in a *PROM.
 
-### Custom charset
+### Decompression
+```cart.asm``` is located at ```$8000``` (standard org address for C64 cartridges), and contains the decompression routine and the ```snake.pack.lz```. It decompresses ```snake.pack.lz``` back to ```$1000```, and jumps to its entry point at ```$2800```.
+
+### Miscellanea
+#### Custom charset
 Index           | Description
 ----------------|-------------
 ```$00 - $1F``` |   A-Z (space first)
@@ -49,9 +60,4 @@ Index           | Description
 ```$40 - $4F``` |   hex digits
 ```$50 - $5F``` |   hex digits, reversed
 ```$60 -    ``` |   game tiles
-
-### Cartridge
-Cartridge version is at $8000 and simply copies itself back at $800.
-
-Cartridge version can not be built with DEBUG=1 flag due to size constraints.
 

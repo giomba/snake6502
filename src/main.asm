@@ -20,34 +20,6 @@
     ECHO "End of zeropage variables. Space left: ",($90 - .)
 #endif
 
-; Initialized segments
-; ----------------------------------------------------------------------
-    SEG autostartSegment
-#if CARTRIDGE = 0
-    org $801
-    INCLUDE "basic.asm" ; BASIC _MUST_ stay at this address
-#else
-    org $800
-    INCLUDE "cart.asm"
-#endif
-    INCLUDE "initdata.asm"
-
-; Program "Segment" Low
-; ----------------------------------------------------------------------
-; You just have to fill this empty space, don't you think so? ;-)
-    INCLUDE "game.asm"
-    INCLUDE "gameover.asm"
-    INCLUDE "introreset.asm"
-    INCLUDE "program.asm"
-    INCLUDE "subroutines.asm"
-    INCLUDE "levels.asm"
-    INCLUDE "intro1.asm"
-; Note: some code had to be included at an higher address
-
-#if VERBOSE = 1
-    ECHO "End of Low Program Segment. Space left:",($1000 - .)
-#endif
-
 ; SID tune (previously properly cleaned, see HVSC)
 ; ----------------------------------------------------------------------
     SEG sidSegment
@@ -55,13 +27,7 @@
 sidtune:
     INCBIN "../res.bin/amour.sid"
 #if VERBOSE = 1
-    ECHO "End of SIDtune at ",.
-#endif
-    INCLUDE "multicolor.asm"
-    INCLUDE "levelreset.asm"
-    INCLUDE "outro.asm"
-#if VERBOSE = 1
-    ECHO "End of Middle Program Segment. Space left:",($2000 - .)
+    ECHO "End of SIDtune at ",.,"Space left:",($2000 - .)
 #endif
 
 ; Font Data
@@ -72,29 +38,25 @@ sidtune:
 tggsFont:
     INCLUDE "tggs.asm"
 
-; Program Segment High
+; Program Segment
 ; ----------------------------------------------------------------------
-
+    SEG programSegment
+    org $2800
+    INCLUDE "program.asm"
+    INCLUDE "initdata.asm"
+    INCLUDE "game.asm"
+    INCLUDE "gameover.asm"
+    INCLUDE "introreset.asm"
+    INCLUDE "subroutines.asm"
+    INCLUDE "levels.asm"
+    INCLUDE "intro1.asm"
+    INCLUDE "multicolor.asm"
+    INCLUDE "levelreset.asm"
+    INCLUDE "outro.asm"
 #if VERBOSE = 1
-    ECHO "End of High Program Segment at: ",.,"Space left:",($cd00 - .)
+    ECHO "End of program segment at:",.
+    ECHO "PACK SIZE:",(. - $1000),"=",[(. - $1000)d]
 #endif
-
-#if VERBOSE = 1
-#if CARTRIDGE = 0
-    ; +2 because of PRG header
-    ECHO "PRG size:",([. - $801 + 2]d),"dec"
-#else
-    ECHO "BIN size:",([. - $800]d),"dec"
-#endif
-#endif
-
-; Uninitialized segments
-; ----------------------------------------------------------------------
-; Cartridge locations
-; -------------------
-    SEG.U cartridgeSegment
-    org $8000
-cartridgeStart:
 
 ; Data variables
 ; -----------------
@@ -113,10 +75,8 @@ listX DS 256
 listY DS 256
 
 ;
-; coded during december 2017
+; coded 2017, 2018, 2019, 2020
 ; by giomba -- giomba at glgprograms.it
 ; this software is free software and is distributed
 ; under the terms of GNU GPL v3 license
 ;
-
-; vim: set expandtab tabstop=4 shiftwidth=4:

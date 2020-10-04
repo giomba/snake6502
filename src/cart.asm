@@ -1,14 +1,20 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
+    processor 6502
+
+    SEG cartridgeSegment
+    org $8000
 
 cartridge SUBROUTINE
-
-    WORD #$8009
-    WORD #$801a
+    WORD .coldstart
+    WORD .warmstart
 
     ; CBM80 in PETSCII (cartridge signature for autostart)
     BYTE #$c3,#$c2,#$cd,#$38,#$30
+
+.unlzg:
+    INCBIN "res.bin/unlzg.bin"
+
+.lzpack:
+    INCBIN "bin/snake.pack.lz"
 
 .coldstart:
     sei
@@ -20,28 +26,29 @@ cartridge SUBROUTINE
     cli
 
 .warmstart:
-    ; Copy cartridge content into proper memory location
-    ldx #$20
-    lda #$0
-    tay
-    sta srcPointer
-    sta dstPointer
-    lda #>cartridgeStart
-    sta srcPointer + 1
-    lda #$08
-    sta dstPointer + 1
-.loop:
-    lda (srcPointer),y
-    sta (dstPointer),y
-    iny
-    bne .loop
-    inc srcPointer + 1
-    inc dstPointer + 1
-    dex
-    bne .loop
+    ; address of input compressed data
+    lda #<.lzpack
+    sta 26
+    lda #>.lzpack
+    sta 27
 
-    jmp start
+    ; address of output decompressed data
+    lda #$00
+    sta 28
+    lda #$10
+    sta 29
+    jsr .unlzg
+
+    ; jump to program entry
+    jmp $2800
+
 
 #if VERBOSE = 1
-    ECHO "cart.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+    ECHO "8k CARTRIDGE SIZE:",(. - $8000),"=",[(. - $8000)d]
+    ECHO "SPACE LEFT:",($9fff - .),"=",[($9fff - .)d]
 #endif
+
+    ; force filler for the *PROM
+. = $9fff
+    BYTE #$ff
+
