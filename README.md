@@ -13,6 +13,12 @@ You need the GNU compiler collection and the [dasm](https://dasm-assembler.githu
 ```
 $ make
 ```
+Interesting targets:
+
+* ```make bin/snake.bin``` produces .bin, ready to be burnt on an 8K EEPROM for making a cartridge (default)
+* ```make bin/snake.prg``` produces .prg for the emulator, ready to be used on tape/disk
+* ```make tape/disk``` (fastloader, to be done)
+
 You can also define the following environment variables:
 
 ```$ DEBUG=1 make```        build with debugging artifacts

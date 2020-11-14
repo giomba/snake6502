@@ -8,6 +8,16 @@ RES=res.bin/amour.sid res.bin/levels.bin res.bin/unlzg.bin
 bin/snake.bin: bin/snake.pack.lz
 	dasm src/cart.asm -Isrc/ -DVERBOSE=$(VERBOSE) -f3 -sbuild/cart.symbols.txt -obin/snake.bin
 
+#bin/tape.prg: bin/snake.pack.lz.file
+#	dasm src/tape.asm -Isrc/ -DVERBOSE=$(VERBOSE) -f1 -sbuild/tape.sybols.txt -obin/tape.prg
+
+#bin/snake.pack.lz.file: bin/snake.pack.lz
+#	echo -e "\x00\x80" > bin/snake.pack.lz.file
+#	cat bin/snake.pack.lz >> bin/snake.pack.lz.file
+
+bin/snake.prg: bin/snake.pack
+	dasm src/prg.asm -Isrc/ -DVERBOSE=$(VERBOSE) -f1 -sbuild/prg.symbols.txt -obin/snake.prg
+
 bin/snake.pack: env $(ASM) $(RES) bin/explodefont
 	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=$(DEBUG) -DVERBOSE=$(VERBOSE) -DCARTRIDGE=$(CARTRIDGE) -f3 -sbuild/pack.symbols.txt -obin/snake.pack
 
