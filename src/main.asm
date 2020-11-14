@@ -32,11 +32,10 @@ sidtune:
 
 ; Font Data
 ; ----------------------------------------------------------------------
-    SEG tggsSegment
+    SEG fontSegment
     org $2000
 ; This binary data that defines the font is exactly 2kB long ($800)
-tggsFont:
-    INCLUDE "tggs.asm"
+    INCLUDE "font.asm"
 
 ; Program Segment
 ; ----------------------------------------------------------------------

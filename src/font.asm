@@ -2564,5 +2564,5 @@ LASTINIT SET .
    BYTE #%00000000
 
 #if VERBOSE = 1
-    ECHO "tggs.asm @ ",LASTINIT,"len:",(. - LASTINIT)
+    ECHO "font.asm @ ",LASTINIT,"len:",(. - LASTINIT)
 #endif
