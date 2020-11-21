@@ -4,9 +4,11 @@
 
 *snake6502* is a snake-like game clone for Commodore home computers, written for fun because «I always wanted to code something for a computer of my retrocomputers collection – actually, this is the main reason I collect them: to write programs».
 
-Download the [binary .prg](dist/snake.prg).
-
 Current development status [here](https://git.giomba.it/giomba/snake6502).
+
+## Download
+* [.prg](dist/snake.prg) for tapes and disks (size not optimized, yet)
+* [.bin](dist/snake.bin) for 8KiB cartridges
 
 ## Compile
 You need the GNU compiler collection and the [dasm](https://dasm-assembler.github.io/) macro assembler, then:
