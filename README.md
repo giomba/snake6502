@@ -7,25 +7,30 @@
 Current development status [here](https://git.giomba.it/giomba/snake6502).
 
 ## Download
-* [.prg](dist/snake.prg) for tapes and disks (size not optimized, yet)
-* [.bin](dist/snake.bin) for 8KiB cartridges
+* [.d64](dist/snake6502.d64) for floppy disks
+* [.bin](dist/snake6502.bin) for 8KiB cartridges
 
 ## Compile
 You need the GNU compiler collection and the [dasm](https://dasm-assembler.github.io/) macro assembler, then:
 ```
+$ git submodule init
+$ git submodule update
 $ make
 ```
 Interesting targets:
 
-* ```make bin/snake.bin``` produces .bin, ready to be burnt on an 8K EEPROM for making a cartridge (default)
-* ```make bin/snake.prg``` produces .prg for the emulator, ready to be used on tape/disk
-* ```make tape/disk``` (fastloader, to be done)
+* ```make bin/snake6502.bin``` produces .bin, ready to be burnt on an 8K EEPROM for making a cartridge
+* ```make bin/snake6502.d64``` produces .d64, ready to be used for floppy disks
 
 You can also define the following environment variables:
 
 ```$ DEBUG=1 make```        build with debugging artifacts
 
 ```$ VERBOSE=1 make```      output useful info during compilation
+
+## Tape
+Copy ```loader.prg``` and ```packlz``` from disk to tape.
+On a physical machine, you can use [disk2tape](https://git.giomba.it/giomba/cbmutil).
 
 ## Developer docs
 ### Package
