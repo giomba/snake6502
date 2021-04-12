@@ -60,7 +60,7 @@ statusLevelLoad SUBROUTINE
     ; Upper bar -- fill with spaces, color yellow
     ldx #39
 .loop:
-    lda #$0
+    lda #$80
     sta $400,x
     lda #7
     sta $d800,x
@@ -139,9 +139,9 @@ writeLevelElement:
     lda levelT
     sta (levelVideoPointer),y
         ; tiles colors can be found in an array
-        ; position in array = tile value - $60
+        ; position in array = tile value - $e0
     sec
-    sbc #$60
+    sbc #$e0
     tax
     lda tilesColors,x
     sta (levelColorPointer),y

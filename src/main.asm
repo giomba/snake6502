@@ -25,15 +25,16 @@
     SEG sidSegment
     org $1000
 sidtune:
-    INCBIN "../res.bin/amour.sid"
+    INCBIN "../res.bin/amour2.sid"
 #if VERBOSE = 1
-    ECHO "End of SIDtune at ",.,"Space left:",($2000 - .)
+    ECHO "top $2000: End of SIDtune at ",.,"Space left:",($2000 - .)
+    ECHO "top $2400: End of SIDtune at ",.,"Space left:",($2400 - .)
 #endif
 
 ; Font Data
 ; ----------------------------------------------------------------------
     SEG fontSegment
-    org $2000
+    org $2400
 ; This binary data that defines the font is exactly 2kB long ($800)
     INCLUDE "font.asm"
 

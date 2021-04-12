@@ -38,10 +38,10 @@ SCREEN_H    =   24
 
 ; Tiles
 ; -----
-EMPTY_TILE  =   $60
-SNAKE_TILE  =   $61
-FOOD_TILE   =   $62
-WALL_TILE   =   $63
+EMPTY_TILE  =   $e0
+SNAKE_TILE  =   $e1
+FOOD_TILE   =   $e2
+WALL_TILE   =   $e3
 
 ; Tiles colors
 ; Note: these colors will be picked by the level select routine

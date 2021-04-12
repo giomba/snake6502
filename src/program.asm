@@ -166,10 +166,10 @@ checkEndStatus:
 
     ; Play music
     jsr sidtune + 3
-    jsr sidtune + 3
-    jsr sidtune + 3
-    jsr sidtune + 3
-    jsr sidtune + 3
+;    jsr sidtune + 3
+;    jsr sidtune + 3
+;    jsr sidtune + 3
+;    jsr sidtune + 3
 
     ; Increase random value
     inc random

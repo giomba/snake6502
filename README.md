@@ -68,9 +68,10 @@ Address               | PRG   | Description
 #### Custom charset
 Index           | Description
 ----------------|-------------
-```$00 - $1F``` |   A-Z (space first)
-```$20 - $3F``` |   A-Z, reversed (space first)
-```$40 - $4F``` |   hex digits
-```$50 - $5F``` |   hex digits, reversed
-```$60 -    ``` |   game tiles
+```$00 - $7F``` |   unused (space for SID)
+```$80 - $9F``` |   A-Z (space first)
+```$A0 - $BF``` |   A-Z, reversed (space first)
+```$C0 - $CF``` |   hex digits
+```$D0 - $DF``` |   hex digits, reversed
+```$E0 -    ``` |   game tiles
 

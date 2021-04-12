@@ -9,7 +9,7 @@ LASTINIT SET .
 clearScreen SUBROUTINE
     ldx #$ff
 .loop:
-    lda #$00
+    lda #$80
     sta $400,x
     sta $500,x
     sta $600,x
@@ -81,12 +81,12 @@ printByte SUBROUTINE
     lsr
     lsr
     lsr
-    ora #$40        ; add 64 (see font)
+    ora #$c0        ; add 192 (see font)
     sta $400,y      ; print msb char
 
     txa             ; Take least significant nibble (use previous copy)
     and #$0f
-    ora #$40        ; add 64 (see font)
+    ora #$c0        ; add 192 (see font)
     sta $401,y      ; print lsb char
 
     rts
@@ -104,22 +104,22 @@ printString SUBROUTINE
     beq .end                    ; if zero, then end (string must be null-terminated)
     cmp #$20                    ; is space?
     bne .checkP1
-    lda #$0
+    lda #$80
     jmp .print
 .checkP1:
     cmp #$28                    ; is char '(' ?
     bne .checkP2
-    lda #$1b
+    lda #$9b
     jmp .print
 .checkP2:
     cmp #$29                    ; is char ')' ?
     bne .checkP3
-    lda #$1c
+    lda #$9c
     jmp .print
 .checkP3
     cmp #$2e                    ; is char '.' ?
     bne .checkNumber
-    lda #$1d
+    lda #$9d
     jmp .print
 .checkNumber:                   ; is char a number?
     cmp #$2f
@@ -129,14 +129,14 @@ printString SUBROUTINE
     sec
     sbc #$30
     clc
-    adc #$40
+    adc #$c0
     jmp .print
 .nextCheck:
 
 .isLetter:
     ; defaults to an uppercase letter of ASCII set
-    sec
-    sbc #$40
+    clc
+    adc #$40
 .print:
     sta (dstScreenPointer),y    ; put screen code to screen
     iny                         ; next char in string
