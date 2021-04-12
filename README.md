@@ -48,8 +48,9 @@ Address               | PRG   | Description
 ```$0002 - $00FF```   | no    | zero page pointers
 ```$0100 - $01FF```   | no    | stack page
 ```$0200 - $07FF```   | no    | *free ram*
-```$1000 - $1FFF```   | yes   | SID tune
-```$2000 - $27FF```   | yes   | custom char
+```$1000 - $1FFF```   | yes   | SID tune, may overlap charset
+```$2000 - $23FF```   | yes   | custom char, unused, allow SID overlap
+```$2400 - $27FF```   | yes   | custom char (actual)
 ```$2800 - $xxxx```   | yes   | Program segment (only needed part used)
 ```$xxxx - $CCFF```   | no    | *free ram*
 ```$CD00 - $CDFF```   | no    | data segment (not-initialized vars)
