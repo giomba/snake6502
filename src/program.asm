@@ -73,7 +73,7 @@ menu SUBROUTINE
     beq .printCounter       ; if yes, print current counter
 #endif
     cmp #$51                ; Is it Q?
-    bne .menu       ; If not, keep looping here,
+    bne .menu               ; If not, keep looping here,
     jmp $fce2               ; else, reset the computer
 
 #if DEBUG = 1
@@ -184,8 +184,28 @@ checkStatusIntro3:
     jmp checkEndStatus
 checkStatusIntro4:
     cmp #ST_INTRO4
-    bne checkStatusMenuReset
+    bne checkStatusIntro5
     jsr statusIntro4
+    jmp checkEndStatus
+checkStatusIntro5:
+    cmp #ST_INTRO5
+    bne checkStatusIntro6
+    jsr statusIntro5
+    jmp checkEndStatus
+checkStatusIntro6:
+    cmp #ST_INTRO6
+    bne checkStatusIntro7
+    jsr statusIntro6
+    jmp checkEndStatus
+checkStatusIntro7:
+    cmp #ST_INTRO7
+    bne checkStatusIntro8
+    jsr statusIntro7
+    jmp checkEndStatus
+checkStatusIntro8:
+    cmp #ST_INTRO8
+    bne checkStatusMenuReset
+    jsr statusIntro8
     jmp checkEndStatus
 checkStatusMenuReset:
     cmp #ST_MENURESET

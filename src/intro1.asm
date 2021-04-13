@@ -245,12 +245,119 @@ statusIntro4 SUBROUTINE
     jsr printString
 
     lda counter
-    cmp #$86
+    cmp #$08
     bne .end
     lda counter + 1
-    cmp #$01
+    cmp #$02
     bne .end
-    lda #ST_INTRO4
+
+    lda #$80
+    ldy #$0
+.loop:
+    sta $540,y
+    iny
+    cpy #200
+    bne .loop
+
+    lda #ST_INTRO5
+    sta status
+
+.end:
+    rts
+
+statusIntro5 SUBROUTINE
+    jsr setupMagicInterrupt
+
+    ; "PRESENT"
+    lda #<introStringA4
+    sta srcStringPointer
+    lda #>introStringA4
+    sta srcStringPointer + 1
+    lda #$50
+    sta dstScreenPointer
+    lda #$05
+    sta dstScreenPointer + 1
+    jsr printString
+
+    lda counter
+    cmp #$80
+    bne .end
+    lda counter + 1
+    cmp #$02
+    bne .end
+
+    lda #ST_INTRO6
+    sta status
+
+.end:
+    rts
+
+statusIntro6 SUBROUTINE
+    jsr setupMagicInterrupt
+
+    ; "A COMMODORE 64"
+    lda #<introStringA5
+    sta srcStringPointer
+    lda #>introStringA5
+    sta srcStringPointer + 1
+    lda #$9d
+    sta dstScreenPointer
+    lda #$05
+    sta dstScreenPointer + 1
+    jsr printString
+
+    lda counter
+    cmp #$08
+    bne .end
+    lda counter + 1
+    cmp #$03
+    bne .end
+
+    lda #ST_INTRO7
+    sta status
+
+.end:
+    rts
+
+statusIntro7 SUBROUTINE
+    jsr setupMagicInterrupt
+
+    ; "VIDEOGAME"
+    lda #<introStringA6
+    sta srcStringPointer
+    lda #>introStringA6
+    sta srcStringPointer + 1
+    lda #$ef
+    sta dstScreenPointer
+    lda #$05
+    sta dstScreenPointer + 1
+    jsr printString
+
+    lda counter
+    cmp #$80
+    bne .end
+    lda counter + 1
+    cmp #$03
+    bne .end
+
+    lda #ST_INTRO8
+    sta status
+
+.end:
+    rts
+
+statusIntro8 SUBROUTINE
+    jsr setupMagicInterrupt
+
+    ; blank wait
+    lda counter
+    cmp #$16
+    bne .end
+    lda counter + 1
+    cmp #$04
+    bne .end
+
+    lda #ST_MENURESET
     sta status
 
 .end:
@@ -268,6 +375,14 @@ statusMenuReset SUBROUTINE
     dex
     cpx #$ff
     bne .colorShadeLoop
+
+    lda #$05
+    ldy #$0
+.lastlineColorLoop:
+    sta $db98,y
+    iny
+    cpy #80
+    bne .lastlineColorLoop
 
     ; Print website
     lda #<intro2string          ; lsb of string address

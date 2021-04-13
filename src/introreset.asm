@@ -17,6 +17,7 @@ introreset SUBROUTINE
     lda #14
     sta introYscroll
 
+    ; for "GLGPROGRAMS" at the beginning
     ldx #$78
     stx dstPointer
     ldy #$04
@@ -24,6 +25,16 @@ introreset SUBROUTINE
 
     lda #68+19
     sta rasterLineInt
+
+    lda #$01
+    ldy #$0
+.colorLoop:
+    sta $d800,y
+    sta $d900,y
+    sta $da00,y
+    sta $db00,y
+    dey
+    bne .colorLoop
 
 #if DEBUG = 1
     ldy #$00
@@ -33,6 +44,7 @@ introreset SUBROUTINE
     iny
     bne .charsetLoop
 #endif
+    rts
 
 #if VERBOSE = 1
     ECHO "introreset.asm @ ",LASTINIT,"len:",(. - LASTINIT)

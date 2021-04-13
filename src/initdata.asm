@@ -28,6 +28,10 @@ ST_INTRO1       =   1
 ST_INTRO2       =   2
 ST_INTRO3       =   3
 ST_INTRO4       =   4
+ST_INTRO5       =   5
+ST_INTRO6       =   6
+ST_INTRO7       =   7
+ST_INTRO8       =   8
 ST_MENURESET    =   64
 ST_MENU         =   65
 ST_LEVEL_TITLE  =   128
@@ -106,6 +110,15 @@ introStringA2:
     BYTE #$0
 introStringA3:
     BYTE "GIOMBA"
+    BYTE #$0
+introStringA4:
+    BYTE "PRESENT"
+    BYTE #$0
+introStringA5:
+    BYTE "A COMMODORE 64"
+    BYTE #$0
+introStringA6:
+    BYTE "VIDEOGAME"
     BYTE #$0
 
 ; Levels

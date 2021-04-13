@@ -4,6 +4,7 @@ LASTINIT SET .
 
 ; load new level on the screen
 statusLevelTitle SUBROUTINE
+    jsr multicolorOff
     jsr clearScreen
 
     ; Print "Next Level"
@@ -57,6 +58,7 @@ statusLevelTitle SUBROUTINE
     rts
 
 statusLevelLoad SUBROUTINE
+    jsr multicolorOn
     ; Upper bar -- fill with spaces, color yellow
     ldx #39
 .loop:
