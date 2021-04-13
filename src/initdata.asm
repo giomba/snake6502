@@ -25,11 +25,16 @@ delay:
 ; Status of the game (costants pre-processor defined, sort of enum)
 ST_INTRO0       =   0
 ST_INTRO1       =   1
-ST_LEVEL_TITLE  =   2
-ST_LEVEL_LOAD   =   3
-ST_PLAY         =   4
-ST_DELAY        =   5
-ST_END          =   6
+ST_INTRO2       =   2
+ST_INTRO3       =   3
+ST_INTRO4       =   4
+ST_MENURESET    =   64
+ST_MENU         =   65
+ST_LEVEL_TITLE  =   128
+ST_LEVEL_LOAD   =   129
+ST_PLAY         =   130
+ST_DELAY        =   131
+ST_END          =   132
 ST_PAUSE        =	255
 
 ; Screen features
@@ -79,7 +84,7 @@ intro3string:
 #if DEBUG = 1
 	BYTE "DBG RELS"
 #else
-    BYTE "(C) 2018"
+    BYTE "2017 (C) 2021"
 #endif
     BYTE #0
 levelIntroString:
@@ -93,6 +98,15 @@ scoreString:
 noMoreLevelsString:
     BYTE "NO MORE LEVELS"
     BYTE #0
+introStringA1:
+    BYTE "RETROFFICINA"
+    BYTE #$0
+introStringA2:
+    BYTE "AND"
+    BYTE #$0
+introStringA3:
+    BYTE "GIOMBA"
+    BYTE #$0
 
 ; Levels
 ; ----------------------------------------------------------------------

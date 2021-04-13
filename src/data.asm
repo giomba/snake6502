@@ -54,6 +54,14 @@ delayStatus:
 score:
     WORD
 
+; vertical scroll intro
+introYscroll:
+    BYTE
+
+; raster line for interrupt
+rasterLineInt:
+    BYTE
+
 #if VERBOSE = 1
     ECHO "data.asm @ ",LASTINIT,"len:",(. - LASTINIT)
 #endif

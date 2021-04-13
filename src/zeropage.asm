@@ -26,6 +26,9 @@ strlenString DS 2
 srcPointer DS 2
 dstPointer DS 2
 
+; Interrupt counter
+counter DS 2
+
 ; Note: Locations $90-$FF in zeropage are used by kernal
 
 

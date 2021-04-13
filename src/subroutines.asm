@@ -14,7 +14,7 @@ clearScreen SUBROUTINE
     sta $500,x
     sta $600,x
     sta $700,x
-    lda #$05
+    lda #$0f
     sta $d800,x
     sta $d900,x
     sta $da00,x

@@ -63,16 +63,32 @@ zeroFillZeroPage:
     ; Reset screen (and other parameters) to play intro
     jsr introreset
 
-intro0running:              ; Cycle here until SPACE or `Q` is pressed
+menu SUBROUTINE
+.menu:              ; Cycle here until SPACE or `Q` is pressed
     jsr $ffe4               ; GETIN
     cmp #$20                ; Is it SPACE?
-    beq intro0end           ; if yes, go to intro0end and start game (see)
+    beq .intro0end          ; if yes, go to intro0end and start game (see)
+#if DEBUG = 1
+    cmp #$41                ; Is it A?
+    beq .printCounter       ; if yes, print current counter
+#endif
     cmp #$51                ; Is it Q?
-    bne intro0running       ; If not, keep looping here,
+    bne .menu       ; If not, keep looping here,
     jmp $fce2               ; else, reset the computer
 
+#if DEBUG = 1
+.printCounter
+    lda counter + 1
+    ldy #2
+    jsr printByte
+    lda counter
+    ldy #4
+    jsr printByte
+    jmp .menu
+#endif
+
     ; Intro is finished, now it's time to start the proper game
-intro0end:
+.intro0end:
     ; Set current level pointer to list start
     lda #<levelsList
     sta levelPointer
@@ -92,20 +108,21 @@ intro0end:
     lda #ST_LEVEL_TITLE
     sta status
 
-endless:
+.endless:
     ; Loop waiting for gameover
     lda status
     cmp #ST_END     ; is status equal to end ?
-    bne endless     ; if not, just wait looping here, else...
+    bne .endless     ; if not, just wait looping here, else...
 
-    jsr introreset  ; reset variables for intro
-    lda #ST_INTRO0
-    sta status      ; put machine into play intro status
-    jmp intro0running   ; and go there waiting for keypress
+    jsr clearScreen
+
+    lda #ST_MENURESET
+    sta status          ; put machine into menu status
+    jmp .menu           ; and go there waiting for keypress
 
 ; Interrupt Handler
 ; ----------------------------------------------------------------------
-irq:
+irq SUBROUTINE
     ; Things that must be done every interrupt (50Hz)
     ; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ; Acknoweledge IRQ
@@ -119,22 +136,66 @@ irq:
     pha
 
 #if DEBUG = 1
+    ; Change background to show how much time does music take for each interrupt
+    lda #1
+    sta $d020
+#endif
+
+    ; if interrupt raster line is not 0, then someone is doing some magic elsewhere
+    lda $d012
+    ;bne .noPlay
+    ; Play music first -> no skew if computations are slow
+    jsr sidtune + 3
+.noPlay:
+
+#if DEBUG = 1
     ; Change background to visually see the ISR timing
     lda #2
     sta $d020
 #endif
 
+    inc counter
+    bne .noIncCounter
+    inc counter + 1
+.noIncCounter
+
     ; Check status and call appropriate sub-routine
     ; Sort of switch-case
     lda status
+checkStatusIntro0:
     cmp #ST_INTRO0
     bne checkStatusIntro1
     jsr statusIntro0
     jmp checkEndStatus
 checkStatusIntro1:
     cmp #ST_INTRO1
-    bne checkStatusPlay
+    bne checkStatusIntro2
     jsr statusIntro1
+    jmp checkEndStatus
+checkStatusIntro2:
+    cmp #ST_INTRO2
+    bne checkStatusIntro3
+    jsr statusIntro2
+    jmp checkEndStatus
+checkStatusIntro3:
+    cmp #ST_INTRO3
+    bne checkStatusIntro4
+    jsr statusIntro3
+    jmp checkEndStatus
+checkStatusIntro4:
+    cmp #ST_INTRO4
+    bne checkStatusMenuReset
+    jsr statusIntro4
+    jmp checkEndStatus
+checkStatusMenuReset:
+    cmp #ST_MENURESET
+    bne checkStatusMenu
+    jsr statusMenuReset
+    jmp checkEndStatus
+checkStatusMenu:
+    cmp #ST_MENU
+    bne checkStatusPlay
+    jsr statusMenu
     jmp checkEndStatus
 checkStatusPlay:
     cmp #ST_PLAY
@@ -157,19 +218,6 @@ checkStatusLevelLoad:
     jsr statusLevelLoad
     jmp checkEndStatus
 checkEndStatus:
-
-#if DEBUG = 1
-    ; Change background to show how much time does music take for each interrupt
-    lda #1
-    sta $d020
-#endif
-
-    ; Play music
-    jsr sidtune + 3
-;    jsr sidtune + 3
-;    jsr sidtune + 3
-;    jsr sidtune + 3
-;    jsr sidtune + 3
 
     ; Increase random value
     inc random
