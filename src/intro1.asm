@@ -2,8 +2,42 @@
 LASTINIT SET .
 #endif
 
-; Currently statusIntro0 is the same as statusIntro1
-; statusIntro1 has just been reserved for future use
+introreset SUBROUTINE
+    jsr multicolorOff
+
+    jsr clearScreen
+
+    ; Set screen colors
+    lda #0
+    sta $d020   ; overscan
+    sta $d021   ; center
+
+    lda #14
+    sta introYscroll
+
+    ; for "GLGPROGRAMS" at the beginning
+    ldx #$78
+    stx dstPointer
+    ldy #$04
+    sty dstPointer + 1
+
+    ; GLGPROGRAMS color
+    ldy #$00
+    lda #$02
+.colorLoop:
+    sta $d800,y
+    sta $d900,y
+    sta $da00,y
+    sta $db00,y
+    dey
+    bne .colorLoop
+
+    ; first raster interrupt line, for moustaches
+    lda #68+19
+    sta rasterLineInt
+
+    rts
+
 statusIntro0 SUBROUTINE
     lda introYscroll
 
@@ -15,7 +49,7 @@ statusIntro0 SUBROUTINE
     cmp #$07
     beq .nextline
     inc $d011
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
     rts
 .nextline:
     lda $d011
@@ -49,7 +83,7 @@ statusIntro0 SUBROUTINE
     dec introYscroll
     beq .next
 
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     rts
 
@@ -58,10 +92,10 @@ statusIntro0 SUBROUTINE
     sta status
     rts
 
-setupMagicInterrupt SUBROUTINE
+setupMoustacheInterrupt SUBROUTINE
     ; Store in $314 address of our custom interrupt handler
-    ldx #<.magicInterruptH
-    ldy #>.magicInterruptH
+    ldx #<.moustacheInterruptH
+    ldy #>.moustacheInterruptH
     stx $314
     sty $315
 
@@ -71,15 +105,17 @@ setupMagicInterrupt SUBROUTINE
 
     rts
 
-.magicInterruptH:
+.moustacheInterruptH:
     ; +36
     dec $d019   ; +42, EOI
-    inc $d020   ; +48, white
-    bit $02     ; +51, timing
-    nop         ; +53, timing
-    nop         ; +55, timing
-    nop         ; +57, timing
-    dec $d020   ; +63, black
+    lda #$02    ; +44, color
+    sta $d020   ; +48, color
+    nop         ; +50, timing
+    nop         ; +52, timing
+    nop         ; +54, timing
+    bit $02     ; +57, timing
+    lda #$00    ; +59, color
+    sta $d020   ; +63, color
 
     ; second line, +0
     inc $0800   ; + 6, timing
@@ -89,14 +125,16 @@ setupMagicInterrupt SUBROUTINE
     inc $0800   ; +30, timing
     inc $0800   ; +36, timing
     inc $0800   ; +42, timing
-    inc $d020   ; +54, white
-    inc $0800   ; +60, timing
-    bit $02     ; +60, timing
-    dec $d020   ; +63, black
+    lda #$02    ; +44, color
+    sta $d020   ; +48, color
+    inc $0800   ; +54, timing
+    bit $02     ; +57, timing
+    lda #$00    ; +59, color
+    sta $d020   ; +63, color
 
     ; set raster beam low
-    ldx #<.magicInterruptL
-    ldy #>.magicInterruptL
+    ldx #<.moustacheInterruptL
+    ldy #>.moustacheInterruptL
     stx $314
     sty $315
     clc
@@ -106,20 +144,24 @@ setupMagicInterrupt SUBROUTINE
 
     jmp $ea31
 
-.magicInterruptL:
+.moustacheInterruptL:
     ; +36
     dec $d019   ; +42, EOI
     inc $0800   ; +48, timing
     inc $0800   ; +54, timing
-    inc $0800   ; +60, timing
+    lda #$02    ; +56, color
+    bit $0800   ; +60, timing
     bit $02     ; +63, timing
 
     ; newline
-    inc $d020   ; + 6, white
+    sta $d020   ; + 4, color
+    lda #$00    ; + 6, timing
     inc $0800   ; +12, timing
     inc $0800   ; +18, timing
-    dec $d020   ; +24, black
-    inc $0800   ; +30, timing
+    nop         ; +20, timing
+    sta $d020   ; +24, color
+    lda #$02    ; +26, color
+    bit $0800   ; +30, timing
     inc $0800   ; +36, timing
     inc $0800   ; +42, timing
     inc $0800   ; +48, timing
@@ -128,10 +170,11 @@ setupMagicInterrupt SUBROUTINE
     bit $02     ; +63, timing
 
     ; newline
-    inc $d020   ; +6, white
+    sta $d020   ; + 4, color
+    lda #$00    ; + 6, color
     inc $0800   ; +12, timing
     inc $0800   ; +18, timing
-    dec $d020   ; +24, black
+    sta $d020   ; +22, color
 
     ldx #<irq
     ldy #>irq
@@ -157,12 +200,12 @@ statusIntro1 SUBROUTINE
     inc $d011
     inc rasterLineInt
 
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     rts
 
 .next:
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     lda counter
     cmp #$80
@@ -171,7 +214,14 @@ statusIntro1 SUBROUTINE
     cmp #$00
     bne .end
 
-    ; lda #ST_MENURESET
+    ldy #$0
+    lda #$07
+.colorLoop:
+    sta $d940,y
+    iny
+    cpy #200
+    bne .colorLoop
+
     lda #ST_INTRO2
     sta status
 
@@ -179,14 +229,14 @@ statusIntro1 SUBROUTINE
     rts
 
 statusIntro2 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "RETROFFICINA"
     lda #<introStringA1
     sta srcStringPointer
     lda #>introStringA1
     sta srcStringPointer + 1
-    lda #$4e
+    lda #$48
     sta dstScreenPointer
     lda #$05
     sta dstScreenPointer + 1
@@ -205,14 +255,14 @@ statusIntro2 SUBROUTINE
     rts
 
 statusIntro3 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "AND"
     lda #<introStringA2
     sta srcStringPointer
     lda #>introStringA2
     sta srcStringPointer + 1
-    lda #$a3
+    lda #$a5
     sta dstScreenPointer
     lda #$05
     sta dstScreenPointer + 1
@@ -231,14 +281,14 @@ statusIntro3 SUBROUTINE
     rts
 
 statusIntro4 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "GIOMBA"
     lda #<introStringA3
     sta srcStringPointer
     lda #>introStringA3
     sta srcStringPointer + 1
-    lda #$f1
+    lda #$f9
     sta dstScreenPointer
     lda #$05
     sta dstScreenPointer + 1
@@ -266,7 +316,7 @@ statusIntro4 SUBROUTINE
     rts
 
 statusIntro5 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "PRESENT"
     lda #<introStringA4
@@ -293,7 +343,7 @@ statusIntro5 SUBROUTINE
     rts
 
 statusIntro6 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "A COMMODORE 64"
     lda #<introStringA5
@@ -320,7 +370,7 @@ statusIntro6 SUBROUTINE
     rts
 
 statusIntro7 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; "VIDEOGAME"
     lda #<introStringA6
@@ -347,7 +397,7 @@ statusIntro7 SUBROUTINE
     rts
 
 statusIntro8 SUBROUTINE
-    jsr setupMagicInterrupt
+    jsr setupMoustacheInterrupt
 
     ; blank wait
     lda counter
@@ -406,14 +456,14 @@ statusMenuReset SUBROUTINE
     sta dstScreenPointer + 1
     jsr printString
 
-    jsr setupMagicInterrupt     ; never forget the magic
+    jsr setupMoustacheInterrupt     ; never forget the magic moustaches
 
     lda #ST_MENU
     sta status
     rts
 
 statusMenu SUBROUTINE
-    jsr setupMagicInterrupt     ; never forget to draw the lines
+    jsr setupMoustacheInterrupt     ; never forget to draw the moustaches
     ; Decrement interrupt divider for the intro
     ldx introCounter
     dex

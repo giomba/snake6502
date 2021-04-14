@@ -46,7 +46,6 @@ sidtune:
     INCLUDE "initdata.asm"
     INCLUDE "game.asm"
     INCLUDE "gameover.asm"
-    INCLUDE "introreset.asm"
     INCLUDE "subroutines.asm"
     INCLUDE "levels.asm"
     INCLUDE "intro1.asm"

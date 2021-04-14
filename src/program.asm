@@ -141,12 +141,8 @@ irq SUBROUTINE
     sta $d020
 #endif
 
-    ; if interrupt raster line is not 0, then someone is doing some magic elsewhere
-    lda $d012
-    ;bne .noPlay
-    ; Play music first -> no skew if computations are slow
+    ; Play music first -> no audio skew if computations are slow
     jsr sidtune + 3
-.noPlay:
 
 #if DEBUG = 1
     ; Change background to visually see the ISR timing
