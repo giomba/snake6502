@@ -34,7 +34,7 @@ introreset SUBROUTINE
 
     ; first raster interrupt line, for moustaches
     lda #68+19
-    sta rasterLineInt
+    sta moustacheLine
 
     rts
 
@@ -42,7 +42,7 @@ statusIntro0 SUBROUTINE
     lda introYscroll
 
 .enter:
-    inc rasterLineInt
+    inc moustacheLine
 
     lda $d011
     and #$07
@@ -100,7 +100,7 @@ setupMoustacheInterrupt SUBROUTINE
     sty $315
 
     ; Set raster beam to trigger interrupt at row
-    lda rasterLineInt
+    lda moustacheLine
     sta $d012
 
     rts
@@ -138,7 +138,7 @@ setupMoustacheInterrupt SUBROUTINE
     stx $314
     sty $315
     clc
-    lda rasterLineInt
+    lda moustacheLine
     adc #23
     sta $d012
 
@@ -198,7 +198,7 @@ statusIntro1 SUBROUTINE
     cmp #$04
     beq .next
     inc $d011
-    inc rasterLineInt
+    inc moustacheLine
 
     jsr setupMoustacheInterrupt
 

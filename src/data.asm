@@ -58,8 +58,8 @@ score:
 introYscroll:
     BYTE
 
-; raster line for interrupt
-rasterLineInt:
+; interrupt raster line to draw moustache
+moustacheLine:
     BYTE
 
 #if VERBOSE = 1
