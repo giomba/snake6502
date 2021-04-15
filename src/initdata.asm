@@ -71,16 +71,6 @@ WALL_COLOR:
 gameoverString:
     BYTE "GAME IS OVER"
     BYTE #0
-intro0string:
-#if SYSTEM = 64
-    BYTE "   SNAKE BY GIOMBA   "
-#else
-	BYTE "  SNAKE16 BY GIOMBA  "
-#endif
-    BYTE #0
-intro1string:
-    BYTE " PRESS SPACE TO PLAY "
-    BYTE #0
 intro2string:
     BYTE "RETROFFICINA.GLGPROGRAMS.IT"
     BYTE #0
@@ -94,8 +84,6 @@ intro3string:
 levelIntroString:
     BYTE "NEXT LEVEL"
     BYTE #0
-colorshade: ; a gradient of dark-bright-dark (40 columns)
-	HEX 0b 0b 0b 0b 0b 0c 0c 0c 0c 0c 05 05 05 0d 0d 0d 0d 07 07 07 07 07 07 0d 0d 0d 0d 05 05 05 0c 0c 0c 0c 0c 0b 0b 0b 0b 0b
 scoreString:
 	BYTE "SCORE      PART"
 	BYTE #0

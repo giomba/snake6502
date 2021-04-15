@@ -62,6 +62,14 @@ introYscroll:
 moustacheLine:
     BYTE
 
+; horizontal intro scroll
+XScrollOffset:
+    BYTE
+XScrollDirection:
+    BYTE
+XCharOffset:
+    BYTE
+
 #if VERBOSE = 1
     ECHO "data.asm @ ",LASTINIT,"len:",(. - LASTINIT)
 #endif

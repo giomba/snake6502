@@ -414,18 +414,6 @@ statusIntro8 SUBROUTINE
     rts
 
 statusMenuReset SUBROUTINE
-    jsr multicolorOff
-
-    ; Copy shade colors from costant table to color RAM for 2nd and 4th line of text
-    ldx #39
-.colorShadeLoop:
-    lda colorshade,x
-    sta $d828,x     ; 2nd line
-    sta $d878,x     ; 4th line
-    dex
-    cpx #$ff
-    bne .colorShadeLoop
-
     lda #$05
     ldy #$0
 .lastlineColorLoop:
@@ -433,6 +421,36 @@ statusMenuReset SUBROUTINE
     iny
     cpy #80
     bne .lastlineColorLoop
+
+    ; Print Game Title
+    lda #$00
+    sta dstPointer
+    lda #$04
+    sta dstPointer + 1
+
+    ; Print big "SNAKE"
+    ldx #<SnakeText
+    ldy #>SnakeText
+    stx srcPointer
+    sty srcPointer + 1
+    ldy #$00
+.SnakeTitleLoop:
+    lda (srcPointer),y
+    sta (dstPointer),y
+    inc srcPointer
+    bne .noinc1
+    inc srcPointer + 1
+.noinc1:
+    inc dstPointer
+    bne .noinc2
+    inc dstPointer + 1
+.noinc2:
+    lda dstPointer
+    cmp #$18
+    bne .SnakeTitleLoop
+    lda dstPointer + 1
+    cmp #$05
+    bne .SnakeTitleLoop
 
     ; Print website
     lda #<intro2string          ; lsb of string address
@@ -443,7 +461,7 @@ statusMenuReset SUBROUTINE
     sta dstScreenPointer        ; put into lsb of dest pointer
     lda #$07                    ; do the same for msb of adress of 20th line
     sta dstScreenPointer + 1    ; put into msb of dest pointer
-    jsr printString              ; print
+    jsr printString             ; print
 
     ; Print Copyright
     lda #<intro3string          ; the assembly is the same as above,
@@ -456,87 +474,184 @@ statusMenuReset SUBROUTINE
     sta dstScreenPointer + 1
     jsr printString
 
+    lda #$f2
+    sta $540
+    lda #$f3
+    sta $567
+    ldy #$1
+    lda #$f4
+.cancelPresent:
+    sta $540,y
+    iny
+    cpy #39
+    bne .cancelPresent
+
+    lda #$05
+    sta XCharOffset
+
     jsr setupMoustacheInterrupt     ; never forget the magic moustaches
 
     lda #ST_MENU
     sta status
     rts
 
+SnakeText:
+    HEX 80 80 80 80 80 80 80 80 f6 a0 a0 f9 80 f7 80 80 f6 80 f6 a0 a0 f7 80 f7 80 80 80 f6 a0 a0 f9 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 a0 80 80 80 80 a0 f7 80 a0 80 a0 80 80 a0 80 a0 f6 f7 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 a0 80 80 80 80 a0 a0 f7 a0 80 a0 80 80 a0 80 a0 a0 f9 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 f8 a0 a0 f7 80 a0 f8 a0 a0 80 a0 a0 a0 a0 80 a0 f9 80 80 a0 a0 80 80 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 80 80 80 a0 80 a0 80 f8 a0 80 a0 80 80 a0 80 a0 f7 80 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 80 80 80 a0 80 a0 80 80 a0 80 a0 80 80 a0 80 a0 a0 f7 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
+    HEX 80 80 80 80 80 80 80 80 f6 a0 a0 f9 80 f8 80 80 f8 80 f9 80 80 f8 80 a0 f8 f9 80 f8 a0 a0 f7 80 80 80 80 80 80 80 80 80
+
+setupXScrollInterrupt SUBROUTINE
+    ldx #<XScrollInterruptH
+    ldy #>XScrollInterruptH
+    stx $314
+    sty $315
+
+    ; Set raster beam to trigger interrupt at row
+    lda #42
+    sta $d012
+
+    rts
+
+XScrollInterruptH SUBROUTINE
+    lda $d016
+    and #$f8
+    ora XScrollOffset
+    sta $d016
+
+    dec $d019
+
+    ldx #<XScrollInterruptL
+    ldy #>XScrollInterruptL
+    stx $314
+    sty $315
+    lda #110
+    sta $d012
+
+    jmp $ea31
+
+XScrollInterruptL SUBROUTINE
+    lda $d016
+    and #$f8
+    sta $d016
+
+    dec $d019
+
+    ldx #<XScrollInterruptMoveAll
+    ldy #>XScrollInterruptMoveAll
+    stx $314
+    sty $315
+    lda #120
+    sta $d012
+
+    jmp $ea31
+
+XScrollInterruptMoveAll SUBROUTINE
+    dec $d019   ; EOI
+
+    lda XCharOffset
+    cmp #9
+    bcs .isEdge
+    cmp #2
+    bcc .isEdge
+    jmp .enter
+
+.isEdge:
+    lda counter
+    and #$01
+    beq .enter  ; ah, some good spaghetti code to accomodate for far branch
+    jmp .next   ; bounce slower
+
+.enter:
+    lda XScrollDirection
+    and #$01
+    bne .goRight
+.goLeft:
+    dec XScrollOffset
+    lda XScrollOffset
+    and #$07
+    cmp #$07
+    beq .continue1
+    jmp .next
+.continue1:
+    lda #$07
+    sta XScrollOffset
+.moveEverythingLeft:
+    dec XCharOffset
+    ldy #0
+.loop1:
+    lda $401,y
+    sta $400,y
+    lda $429,y
+    sta $428,y
+    lda $451,y
+    sta $450,y
+    lda $479,y
+    sta $478,y
+    lda $4a1,y
+    sta $4a0,y
+    lda $4c9,y
+    sta $4c8,y
+    lda $4f1,y
+    sta $4f0,y
+    iny
+    cpy #38
+    bne .loop1
+
+    lda XCharOffset
+    cmp #0
+    bne .next
+    lda #$01
+    sta XScrollDirection
+    jmp .next
+
+.goRight:
+    inc XScrollOffset
+    lda XScrollOffset
+    and #$07
+    cmp #$00
+    bne .next
+    lda #$00
+    sta XScrollOffset
+.moveEverythingRight:
+    inc XCharOffset
+    ldy #38
+.loop2:
+    lda $400,y
+    sta $401,y
+    lda $428,y
+    sta $429,y
+    lda $450,y
+    sta $451,y
+    lda $478,y
+    sta $479,y
+    lda $4a0,y
+    sta $4a1,y
+    lda $4c8,y
+    sta $4c9,y
+    lda $4f0,y
+    sta $4f1,y
+    dey
+    bne .loop2
+
+    lda XCharOffset
+    cmp #10
+    bne .next
+    lda #$00
+    sta XScrollOffset
+    lda #$00
+    sta XScrollDirection
+
+.next:
+    jsr setupMoustacheInterrupt
+
+    jmp $ea31
+
 statusMenu SUBROUTINE
-    jsr setupMoustacheInterrupt     ; never forget to draw the moustaches
-    ; Decrement interrupt divider for the intro
-    ldx introCounter
-    dex
-    stx introCounter
-    cpx #0
-    beq status1do   ; if divider is 0, then do status1do ...
-    rts             ; ... else just do nothing and return
-status1do:
-    ; Reset introCounter
-    ldx #5
-    stx introCounter
-
-    ; I want to print strings at different columns to make them
-    ; bounce across the screen, so take last introX and add introXinc,
-    ; then print string at that point. If introX is too far right, then
-    ; set introXinc as #$ff (equals -1) so next time introX will be
-    ; decremented by 1. And then, if introX is too far left, then
-    ; set introXinc as #$01 so next time will be moved to right again.
-    lda introX
-    clc
-    adc introXinc       ; this is #$01 or #$0ff, so actually it is +1 or -1
-    sta introX
-    cmp #19             ; am I too far right?
-    beq status1setSX    ; if yes, set SX (left)
-    cmp #0              ; am I too far left?
-    beq status1setDX    ; if yes, set DX (right)
-    jmp status1okset    ; else do nothing (aka, next time re-use current
-                        ; increment value)
-status1setDX:
-    lda #$01            ; set introXinc as +1
-    sta introXinc
-    jmp status1okset
-status1setSX:
-    lda #$ff            ; set introXinc as -1
-    sta introXinc
-    jmp status1okset
-
-status1okset:
-    ; Print "SNAKE BY GIOMBA" (see above for pointer details)
-    lda #<intro0string
-    sta srcStringPointer
-    lda #>intro0string
-    sta srcStringPointer + 1
-    ; $0428 is 2nd line (previously filled with color shades by reset routine)
-    lda #$28
-    clc
-    adc introX                  ; just add X, to make it look like it has moved
-    sta dstScreenPointer
-    lda #$04
-    sta dstScreenPointer + 1
-    jsr printString
-
-    ; Print "PRESS SPACE TO PLAY"
-    lda #<intro1string
-    sta srcStringPointer
-    lda #>intro1string
-    sta srcStringPointer + 1
-    ; $0478 is 4th line (previously filled with color shades by reset routine)
-    ; add #19, then sub introX will make it move to other way of 2nd line
-    lda #$78
-    clc
-    adc #19         ; add #19
-    sec
-    sbc introX      ; sub introX
-    sta dstScreenPointer
-    lda #$04
-    sta dstScreenPointer + 1
-    jsr printString
-
-    ; Some considerations on speed:
-    ; yes, maybe I should have put the string chars once in screen text memory
-    ; and then move it left and right. Should re-think about this.
-    ; For now, just return.
+    jsr setupXScrollInterrupt
     rts
 
 #if VERBOSE = 1
