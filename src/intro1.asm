@@ -552,19 +552,44 @@ XScrollInterruptL SUBROUTINE
 XScrollInterruptMoveAll SUBROUTINE
     dec $d019   ; EOI
 
+    tsx
+    dex
+
     lda XCharOffset
-    cmp #9
+    asl
+    asl
+    asl
+    sta $100,x
+    lda $d016
+    and #$07
+    ora $100,x
+
+    inx
+    txs
+
+    cmp #78
     bcs .isEdge
-    cmp #2
+    cmp #3
     bcc .isEdge
+    cmp #70
+    bcs .isMiddle
+    cmp #10
+    bcc .isMiddle
     jmp .enter
+
+.isMiddle:
+    lda counter
+    and #$01
+    beq .enter
+    jmp .next
 
 .isEdge:
     lda counter
-    and #$01
+    and #$03
     beq .enter  ; ah, some good spaghetti code to accomodate for far branch
     jmp .next   ; bounce slower
 
+.isCenter:
 .enter:
     lda XScrollDirection
     and #$01
