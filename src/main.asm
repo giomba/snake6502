@@ -13,7 +13,6 @@
 ; ----------------------------------------------------------------------
     SEG.U zeropageSegment
     org $02
-    INCLUDE "zeropage.asm"
 
 #if VERBOSE = 1
     ; Locations $90-$FF in zeropage are used by kernal
@@ -74,8 +73,11 @@ sidtune:
 listX DS 256
 listY DS 256
 
+; Includes
+    INCLUDE "zeropage.asm"
+
 ;
-; coded 2017, 2018, 2019, 2020
+; coded 2017, 2018, 2019, 2020, 2021
 ; by giomba -- giomba at glgprograms.it
 ; this software is free software and is distributed
 ; under the terms of GNU GPL v3 license

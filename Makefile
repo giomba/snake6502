@@ -1,7 +1,7 @@
 .POSIX:
 
 ASM=$(wildcard src/*.asm)
-RES=res.bin/amour.sid res.bin/levels.bin res.bin/unlzg.bin
+RES=res.bin/amour2.sid res.bin/levels.bin res.bin/unlzg.bin
 
 .PHONY: debug env clean all
 
@@ -43,8 +43,8 @@ env:
 bin/explodefont: util/explodefont.cpp
 	g++ -o bin/explodefont util/explodefont.cpp
 
-res.bin/amour.sid:
-	cp res.org/amour.sid res.bin/amour.sid
+res.bin/amour2.sid:
+	cp res.org/amour2.sid res.bin/amour2.sid
 
 res.bin/levels.bin: bin/level res.org/levels.txt
 	bin/level < res.org/levels.txt > res.bin/levels.bin

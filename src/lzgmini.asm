@@ -1,44 +1,48 @@
-inflate SUBROUTINE
-.inEnd EQU 2
-.offset EQU 4
-.length EQU 6
-.symbol EQU 25
-.marker1 EQU 30
-.marker2 EQU 31
-.marker3 EQU 32
-.marker4 EQU 33
-.copy EQU 34
+	SEG zeropageSegment
+srcPointer WORD
+dstPointer WORD
+inEnd WORD
+offset WORD
+length BYTE
+symbol BYTE
+marker1 BYTE
+marker2 BYTE
+marker3 BYTE
+marker4 BYTE
+copy WORD
 
+	SEG loaderSegment
+inflate SUBROUTINE
     clc
     ldy #10
     lda (srcPointer),y
     adc srcPointer
-	sta	.inEnd
+	sta	inEnd
 	dey
 	lda	(srcPointer),y
 	adc	srcPointer + 1
-	sta	.inEnd + 1
+	sta	inEnd + 1
 	clc
-	lda	.inEnd
+	lda	inEnd
 	adc	#16
-	sta	.inEnd
-	lda	.inEnd + 1
+	sta	inEnd
+	lda	inEnd + 1
 	adc	#0
-	sta	.inEnd + 1
+	sta	inEnd + 1
 
 	; Get the marker symbols
 	ldy	#16
 	lda	(srcPointer),y
-	sta	.marker1
+	sta	marker1
 	iny
 	lda	(srcPointer),y
-	sta	.marker2
+	sta	marker2
 	iny
 	lda	(srcPointer),y
-	sta	.marker3
+	sta	marker3
 	iny
 	lda	(srcPointer),y
-	sta	.marker4
+	sta	marker4
 
 	; Skip header + marker symbols (16 + 4 bytes)
 	clc
@@ -53,30 +57,30 @@ inflate SUBROUTINE
 	ldy	#0				; Make sure that Y is zero
 .mainloop:
 	lda	srcPointer		; done?
-	cmp	.inEnd
+	cmp	inEnd
 	bne	.notdone
 	lda	srcPointer + 1
-	cmp	.inEnd + 1
+	cmp	inEnd + 1
 	bne	.notdone
 	rts
 .notdone:
 	lda	(srcPointer),y				; A = symbol
-	sta	.symbol
+	sta	symbol
     sta $d020
 	inc	srcPointer
 	bne	.noinc1
 	inc	srcPointer + 1
 .noinc1:
-	cmp	.marker1			; Marker1?
+	cmp	marker1			; Marker1?
 	beq	.domarker1
-	cmp	.marker2			; Marker2?
+	cmp	marker2			; Marker2?
 	beq	.domarker2
-	cmp	.marker3			; Marker3?
+	cmp	marker3			; Marker3?
 	beq	.domarker3
-	cmp	.marker4			; Marker4?
+	cmp	marker4			; Marker4?
 	beq	.domarker4
 .literal:
-	lda	.symbol
+	lda	symbol
 	sta	(dstPointer),y			; Plain copy
 	inc	dstPointer
 	bne	.mainloop
@@ -101,15 +105,15 @@ inflate SUBROUTINE
 	lsr
 	lsr
 	lsr
-	sta	.offset
-	inc	.offset
+	sta	offset
+	inc	offset
 	lda	#0
-	sta	.offset + 1			; offset = (b >> 5) + 1
+	sta	offset + 1			; offset = (b >> 5) + 1
 	txa
 	and	#$1f
 	tax
 	lda	.LZG_LENGTH_DECODE_LUT,x
-	sta	.length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
+	sta	length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
 	jmp	.docopy
 
 	; marker3 - "Short copy"
@@ -130,13 +134,13 @@ inflate SUBROUTINE
 	lsr
 	clc
 	adc	#3
-	sta	.length				; length = (b >> 6) + 3
+	sta	length				; length = (b >> 6) + 3
 	txa
 	and	#$3f
 	adc	#8
-	sta	.offset
+	sta	offset
 	lda	#0
-	sta	.offset + 1			; offset = (b & 0x3f) + 8
+	sta	offset + 1			; offset = (b & 0x3f) + 8
 	beq	.docopy
 
 	; marker2 - "Medium copy"
@@ -154,7 +158,7 @@ inflate SUBROUTINE
 	lsr
 	lsr
 	lsr
-	sta	.offset + 1
+	sta	offset + 1
 	lda	(srcPointer),y
 	inc	srcPointer
 	bne	.noinc6
@@ -162,15 +166,15 @@ inflate SUBROUTINE
 .noinc6:
 	clc
 	adc	#8
-	sta	.offset
+	sta	offset
 	bcc	.noinc7
-	inc	.offset + 1			; offset = (((b & 0xe0) << 3) | b2) + 8
+	inc	offset + 1			; offset = (((b & 0xe0) << 3) | b2) + 8
 .noinc7:
 	txa
 	and	#$1f
 	tax
 	lda	.LZG_LENGTH_DECODE_LUT,x
-	sta	.length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
+	sta	length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
 	bne	.docopy
 
 .literal2:
@@ -188,13 +192,13 @@ inflate SUBROUTINE
 	and	#$1f
 	tax
 	lda	.LZG_LENGTH_DECODE_LUT,x
-	sta	.length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
+	sta	length				; length = .LZG_LENGTH_DECODE_LUT[b & 0x1f]
 	lda	(srcPointer),y
 	inc	srcPointer
 	bne	.noinc9
 	inc	srcPointer + 1
 .noinc9:
-	sta	.offset + 1
+	sta	offset + 1
 	lda	(srcPointer),y
 	inc	srcPointer
 	bne	.noinc10
@@ -202,31 +206,31 @@ inflate SUBROUTINE
 .noinc10:
 	clc
 	adc	#$08
-	sta	.offset
-	lda	.offset + 1
+	sta	offset
+	lda	offset + 1
 	adc	#$08
-	sta	.offset + 1			; offset = ((b2 << 8) | (*src++)) + 2056
+	sta	offset + 1			; offset = ((b2 << 8) | (*src++)) + 2056
 
 	; Copy corresponding data from history window
 .docopy:
 	sec
 	lda	dstPointer
-	sbc	.offset
-	sta	.copy
+	sbc	offset
+	sta	copy
 	lda	dstPointer + 1
-	sbc	.offset + 1
-	sta	.copy + 1
+	sbc	offset + 1
+	sta	copy + 1
 .loop1:
-    lda	(.copy),y
+    lda	(copy),y
 	sta	(dstPointer),y
 	iny
-	cpy	.length
+	cpy	length
 	bne	.loop1
 	ldy	#0				; Make sure that Y is zero
 
 	clc
 	lda	dstPointer
-	adc	.length
+	adc	length
 	sta	dstPointer
 	bcc	.noinc11
 	inc	dstPointer + 1

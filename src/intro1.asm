@@ -2,6 +2,12 @@
 LASTINIT SET .
 #endif
 
+    SEG zeropageSegment
+; Generic src/dst copy pointers
+srcPointer DS 2
+dstPointer DS 2
+
+    SEG programSegment
 introreset SUBROUTINE
     jsr multicolorOff
 
@@ -425,7 +431,7 @@ statusMenuReset SUBROUTINE
 
     ; Print Game Title: big "SNAKE"
     ; color first
-    MEMSET #$d800, #$02, #200
+    MEMSET #$d800, #$02, #150
     ; actual "text"
     lda #$00
     sta dstPointer
@@ -513,6 +519,11 @@ SnakeText:
     HEX 80 80 80 80 80 80 80 80 80 80 80 a0 80 a0 80 f8 a0 80 a0 80 80 a0 80 a0 f7 80 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
     HEX 80 80 80 80 80 80 80 80 80 80 80 a0 80 a0 80 80 a0 80 a0 80 80 a0 80 a0 a0 f7 80 a0 80 80 80 80 80 80 80 80 80 80 80 80
     HEX 80 80 80 80 80 80 80 80 f6 a0 a0 f9 80 f8 80 80 f8 80 f9 80 80 f8 80 a0 f8 f9 80 f8 a0 a0 f7 80 80 80 80 80 80 80 80 80
+
+;ParabolicSpaceChars:
+;    HEX 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 01 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+;ParabolicSpaceScroll:
+;    HEX 00 01 01 01 01 01 01 01 02 02 02 03 03 04 04 05 06 06 07 00 00 01 02 03 04 05 06 07 00 01 02 04 05 06 00 01 02 04 05 07 00 02 04 05 07 00 01 03 04 06 00 01 03 04 06 07 00 02 03 04 06 07 00 01 02 03 04 05 06 07 00 01 02 02 03 04 04 05 05 06 06 06 07 06 07 07 07 07 07 07 07
 
 setupXScrollInterrupt SUBROUTINE
     ldx #<XScrollInterruptH

@@ -1,10 +1,9 @@
     processor 6502
 
-    SEG.U
+    SEG.U zeropageSegment
     org $02
-    INCLUDE "zeropage.asm"
 
-    SEG autostart
+    SEG loaderSegment
     org $801
 autostartRoutine SUBROUTINE
     ; this is at $801
@@ -50,6 +49,7 @@ autostartRoutine SUBROUTINE
 
 ;   DATA
 ; -------------------------------------
+    SEG loaderSegment
 packFileName:
     BYTE "PACKLZ"
 packFileNameEnd:

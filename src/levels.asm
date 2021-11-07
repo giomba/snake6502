@@ -2,6 +2,12 @@
 LASTINIT SET .
 #endif
 
+    SEG zeropageSegment
+; Pointer to video memory used in the level loading routine
+levelVideoPointer WORD
+levelColorPointer WORD
+
+    SEG programSegment
 ; load new level on the screen
 statusLevelTitle SUBROUTINE
     jsr multicolorOff

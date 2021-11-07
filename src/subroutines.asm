@@ -4,7 +4,12 @@ LASTINIT SET .
 
 ; Subroutines
 ; ----------------------------------------------------------------------
+    SEG zeropageSegment
+; Where is the snake head in video memory? Do math to calculate address
+; using pointer at tileMem
+tileMem WORD
 
+    SEG programSegment
 ; Clear screen -- easy
 clearScreen SUBROUTINE
     ldx #$ff
@@ -91,6 +96,13 @@ printByte SUBROUTINE
 
     rts
 
+    SEG zeropageSegment
+; Pointer to string
+srcStringPointer WORD
+; Pointer to screen position where to print intro string
+dstScreenPointer DS 2
+
+    SEG programSegment
 printString SUBROUTINE
 ; Print string
 ; Input parameters:

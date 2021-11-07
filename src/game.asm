@@ -2,6 +2,7 @@
 LASTINIT SET .
 #endif
 
+    SEG programSegment
 statusPlay:     ; do Game
     ; Check counter
     ldx irqn

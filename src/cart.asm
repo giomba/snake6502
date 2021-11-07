@@ -2,11 +2,10 @@
 
     SEG.U zeropageSegment
     org $02
-    INCLUDE "zeropage.asm"
-
-    SEG cartridgeSegment
+    SEG loaderSegment
     org $8000
 
+    SEG loaderSegment
 cartridge SUBROUTINE
     WORD .coldstart
     WORD .warmstart
@@ -55,4 +54,3 @@ cartridge SUBROUTINE
     ; force filler for the *PROM
 . = $9fff
     BYTE #$ff
-

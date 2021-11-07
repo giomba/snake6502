@@ -1,8 +1,6 @@
     SEG zeropageSegment
-ptrDstStart:
-    WORD
-ptrDstEnd:
-    WORD
+ptrDstStart WORD
+ptrDstEnd WORD
 
     MACRO MEMSET
         SEG programSegment
