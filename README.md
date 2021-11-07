@@ -47,23 +47,27 @@ Address               | PRG   | Description
 ```$0000 - $0001```   | no    | hardware
 ```$0002 - $00FF```   | no    | zero page pointers
 ```$0100 - $01FF```   | no    | stack page
-```$0200 - $07FF```   | no    | *free ram*
+```$0200 - $03FF```   | no    | operating system variables
+```$0400 - $07FF```   | no    | video memory
 ```$1000 - $1FFF```   | yes   | SID tune, may overlap charset
 ```$2000 - $23FF```   | yes   | custom char, unused, allow SID overlap
-```$2400 - $27FF```   | yes   | custom char (actual)
+```$2400 - $27FF```   | yes   | custom char (actual 0x80+)
 ```$2800 - $xxxx```   | yes   | Program segment (only needed part used)
 ```$xxxx - $CCFF```   | no    | *free ram*
-```$CD00 - $CDFF```   | no    | data segment (not-initialized vars)
-```$CE00 - $CEFF```   | no    | list X
-```$CF00 - $CFFF```   | no    | list Y
+```$CD00 - $CFFF```   | no    | data segment (not-initialized vars)
 ```$D000 - $DFFF```   | no    | I/O
 ```$E000 - $FFFF```   | no    | Kernal
 
 ### Compression
-```snake.pack``` is compressed into ```snake.pack.lz``` using [liblzg](https://github.com/mbitsnbites/liblzg), to save space in order to fit the game in a *PROM.
+```snake.pack``` is compressed into ```snake.pack.lz``` using [liblzg](https://github.com/mbitsnbites/liblzg), to save space, mainly in order to fit the game in a *PROM.
+Decompression occurs with one of the following loaders.
 
-### Decompression
+### Loader
+#### Cartridge
 ```cart.asm``` is located at ```$8000``` (standard org address for C64 cartridges), and contains the decompression routine and the ```snake.pack.lz```. It decompresses ```snake.pack.lz``` back to ```$1000```, and jumps to its entry point at ```$2800```.
+#### Disk
+```loader.asm``` loads at ```$801```, like any other BASIC automatic runner, and contains the decompression routine.
+```snake.pack.lz``` is loaded at ```$8000``` from disk drive, then decompressed back to ```$1000```, and finally the loader jumps to the program entry point at ```$2800```.
 
 ### Miscellanea
 #### Custom charset
@@ -74,5 +78,24 @@ Index           | Description
 ```$A0 - $BF``` |   A-Z, reversed (space first)
 ```$C0 - $CF``` |   hex digits
 ```$D0 - $DF``` |   hex digits, reversed
-```$E0 -    ``` |   game tiles
+```$E0 - $EF``` |   game tiles
+```$F0 - $FF``` |   semigraphic tiles
+
+##### Semigrahic Tiles
+Char      | Output
+----------|--------
+```$F0``` | ```◜```
+```$F1``` | ```◝```
+```$F2``` | ```◟```
+```$F3``` | ```◞```
+```$F4``` | ```-```
+```$F5``` | ```|```
+```$F6``` | ```◢```
+```$F7``` | ```◣```
+```$F8``` | ```◥```
+```$F9``` | ```◤```
+```$FA``` | ```┴```
+```$FB``` | ```┬```
+```$FC``` | ```┤```
+```$FD``` | ```├```
 
