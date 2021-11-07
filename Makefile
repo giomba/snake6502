@@ -22,7 +22,7 @@ bin/snake.prg: bin/snake.pack
 	dasm src/prg.asm -Isrc/ -DVERBOSE=$(VERBOSE) -f1 -sbuild/prg.symbols.txt -obin/snake.prg
 
 bin/snake.pack: env $(ASM) $(RES) bin/explodefont
-	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=$(DEBUG) -DVERBOSE=$(VERBOSE) -DCARTRIDGE=$(CARTRIDGE) -f3 -sbuild/pack.symbols.txt -obin/snake.pack
+	dasm src/main.asm -Isrc/ -DSYSTEM=64 -DDEBUG=$(DEBUG) -DVERBOSE=$(VERBOSE) -f3 -sbuild/pack.symbols.txt -obin/snake.pack
 
 bin/snake.pack.lz: bin/snake.pack liblzg/src/tools/lzg
 	liblzg/src/tools/lzg bin/snake.pack > bin/snake.pack.lz
