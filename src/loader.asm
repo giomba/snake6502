@@ -54,7 +54,4 @@ packFileName:
     BYTE "PACKLZ"
 packFileNameEnd:
 
-#if VERBOSE = 1
-    ECHO "PRG SIZE:",(. - $801),"=",[(. - $801)d]
-#endif
 

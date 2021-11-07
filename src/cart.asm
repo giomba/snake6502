@@ -1,10 +1,12 @@
     processor 6502
 
+; SEGMENTS
     SEG.U zeropageSegment
     org $02
     SEG loaderSegment
     org $8000
 
+; LOADER
     SEG loaderSegment
 cartridge SUBROUTINE
     WORD .coldstart
@@ -46,10 +48,8 @@ cartridge SUBROUTINE
     ; decompression util
     INCLUDE "lzgmini.asm"
 
-#if VERBOSE = 1
     ECHO "8k CARTRIDGE SIZE:",(. - $8000),"=",[(. - $8000)d]
     ECHO "SPACE LEFT:",($9fff - .),"=",[($9fff - .)d]
-#endif
 
     ; force filler for the *PROM
 . = $9fff

@@ -1,5 +1,6 @@
 # snake6502
 
+![Intro screenshot](scrot/intro.png)
 ![Gameplay screenshot](scrot/gameplay.png)
 
 *snake6502* is a snake-like game clone for Commodore home computers, written for fun because «I always wanted to code something for a computer of my retrocomputers collection – actually, this is the main reason I collect them: to write programs».
@@ -25,8 +26,6 @@ Interesting targets:
 You can also define the following environment variables:
 
 ```$ DEBUG=1 make```        build with debugging artifacts
-
-```$ VERBOSE=1 make```      output useful info during compilation
 
 ## Tape
 Copy ```loader.prg``` and ```packlz``` from disk to tape.
