@@ -1,7 +1,5 @@
     SEG zeropageSegment
-; Generic src/dst copy pointers
-srcPointer DS 2
-dstPointer DS 2
+introDestPtr WORD
 
     SEG programSegment
 introreset SUBROUTINE
@@ -19,9 +17,9 @@ introreset SUBROUTINE
 
     ; for "GLGPROGRAMS" at the beginning
     ldx #$78
-    stx dstPointer
+    stx introDestPtr
     ldy #$04
-    sty dstPointer + 1
+    sty introDestPtr + 1
 
     ; GLGPROGRAMS color
     ldy #$00
@@ -57,29 +55,19 @@ statusIntro0 SUBROUTINE
     and #$f8
     sta $d011
 
-    ldy #0          ; ... clear text line ...
-    lda #$80
-.clearLineLoop:
-    sta (dstPointer),y
-    iny
-    cpy #40
-    bne .clearLineLoop
+    MOV_WORD_MEM dstPointer, introDestPtr
+    MEMSET "D", #$80, #40
 
-    clc             ; ... move dstPointer to next text line ...
-    lda dstPointer
+    clc             ; ... move introDestPtr to next text line ...
+    lda introDestPtr
     adc #40
-    sta dstPointer
-    lda dstPointer + 1
+    sta introDestPtr
+    lda introDestPtr + 1
     adc #0
-    sta dstPointer + 1
+    sta introDestPtr + 1
 
-    ldy #$00        ; ... and copy "GLG Programs" text to next text line
-.glgLoop:
-    lda GLGProgramsText,y
-    sta (dstPointer),y
-    iny
-    cpy #200
-    bne .glgLoop
+    MOV_WORD_MEM dstPointer, introDestPtr
+    MEMCPY "D", #GLGProgramsText, #200    ; ... and copy "GLG Programs" text to next text line
 
     dec introYscroll    ; remember that we are one line below
     beq .next           ; if we reached the end of the vertical scroll, advance status
@@ -196,7 +184,7 @@ GLGProgramsText:    ; fancy PETSCII-looking brand name
 
 statusIntro1 SUBROUTINE
     ; continue moving moustaches down, up to 4 raster lines (middle of text)
-    lda $d011       
+    lda $d011
     and #$07
     cmp #$04
     beq .next   ; if interrupt is in the middle, don't move it anymore, and...
@@ -304,13 +292,7 @@ statusIntro4 SUBROUTINE
     cmp #$02
     bne .end
 
-    lda #$80
-    ldy #$0
-.loop:
-    sta $540,y
-    iny
-    cpy #200
-    bne .loop
+    MEMSET #$540, #$80, #200
 
     lda #ST_INTRO5
     sta status
@@ -426,36 +408,8 @@ statusMenuReset SUBROUTINE
     bne .lastlineColorLoop
 
     ; Print Game Title: big "SNAKE"
-    ; color first
-    MEMSET #$d800, #$02, #150
-    ; actual "text"
-    lda #$00
-    sta dstPointer
-    lda #$04
-    sta dstPointer + 1
-
-    ldx #<SnakeText
-    ldy #>SnakeText
-    stx srcPointer
-    sty srcPointer + 1
-    ldy #$00
-.SnakeTitleLoop:
-    lda (srcPointer),y
-    sta (dstPointer),y
-    inc srcPointer
-    bne .noinc1
-    inc srcPointer + 1
-.noinc1:
-    inc dstPointer
-    bne .noinc2
-    inc dstPointer + 1
-.noinc2:
-    lda dstPointer
-    cmp #$18
-    bne .SnakeTitleLoop
-    lda dstPointer + 1
-    cmp #$05
-    bne .SnakeTitleLoop
+    MEMSET #$d800, #$02, #280       ; color
+    MEMCPY #$400, #SnakeText, #280  ; text
 
     ; Print website
     lda #<intro2string          ; lsb of string address

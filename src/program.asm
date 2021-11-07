@@ -58,11 +58,11 @@ zeroFillZeroPage:
     lda #ST_INTRO0
     sta status
 
-    ; Enable interrupts
-    cli
-
     ; Reset screen (and other parameters) to play intro
     jsr introreset
+
+    ; Enable interrupts
+    cli
 
 menu SUBROUTINE
 .menu:              ; Cycle here until SPACE or `Q` is pressed
