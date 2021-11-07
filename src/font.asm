@@ -1,7 +1,10 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
+; Character ROM starts at $2000, but SID must reside at $1000 and is
+; longer than $1000, then first characters are just ignored, and game
+; uses only characters $80-$ff.
+; Normally, character ROM is 2kB long ($800), but this binary data
+; is exactly 1kB long ($400), because only the upper chars are defined.
 
+   SEG fontSegment
 ; char 0x80, 128
    BYTE #%00000000
    BYTE #%00000000
@@ -1282,7 +1285,3 @@ LASTINIT SET .
    BYTE #%10000001
    BYTE #%10000001
    BYTE #%11111111
-
-#if VERBOSE = 1
-    ECHO "font.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

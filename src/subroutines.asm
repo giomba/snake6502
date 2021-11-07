@@ -1,9 +1,3 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
-; Subroutines
-; ----------------------------------------------------------------------
     SEG zeropageSegment
 ; Where is the snake head in video memory? Do math to calculate address
 ; using pointer at tileMem
@@ -156,6 +150,11 @@ printString SUBROUTINE
 .end:
     rts
 
+    SEG zeropageSegment
+    ; Pointer for Pointer in the NextPointer routine
+nextPointerPointer DS 2
+
+    SEG programSegment
 ; Increment a pointer in the zeropage
 ; Input parameters:
 ;   nextPointerPointer  pointer to the pointer in zeropage
@@ -176,7 +175,3 @@ nextPointer:
     sta (nextPointerPointer),y
 
     rts
-
-#if VERBOSE = 1
-    ECHO "subroutines.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

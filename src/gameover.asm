@@ -1,7 +1,4 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
+    SEG programSegment
 ; Game is over
 ; ----------------------------------------------------------------------
 gameover:
@@ -24,7 +21,3 @@ gameover:
     lda #ST_DELAY
     sta status
     rts
-
-#if VERBOSE = 1
-    ECHO "gameover.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

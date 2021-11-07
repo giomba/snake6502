@@ -1,7 +1,3 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
     SEG programSegment
 statusPlay:     ; do Game
     ; Check counter
@@ -336,9 +332,4 @@ checkEndWallHit:
     sta (tileMem),y
 
 skipPauseTests:
-
     rts
-
-#if VERBOSE = 1
-    ECHO "game.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

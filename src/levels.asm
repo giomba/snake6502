@@ -1,11 +1,9 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
     SEG zeropageSegment
 ; Pointer to video memory used in the level loading routine
 levelVideoPointer WORD
 levelColorPointer WORD
+; Pointer to level struct
+levelPointer WORD
 
     SEG programSegment
 ; load new level on the screen
@@ -173,7 +171,3 @@ writeLevelEnd:
     lda #ST_PLAY
     sta status
     rts
-
-#if VERBOSE = 1
-    ECHO "levels.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

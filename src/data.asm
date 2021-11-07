@@ -1,9 +1,4 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
-; Data section - Not initialized variables ($CD00 - $CDFF)
-; ----------------------------------------------------------------------
+    SEG.U dataSegment
 ; Number of interrupt
 ; Used as counter to be decremented to do some things less frequently
 irqn:
@@ -70,6 +65,6 @@ XScrollDirection:
 XCharOffset:
     BYTE
 
-#if VERBOSE = 1
-    ECHO "data.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif
+; Lists for snake head and tail
+listX DS 256
+listY DS 256

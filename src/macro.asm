@@ -2,8 +2,8 @@
 ptrDstStart WORD
 ptrDstEnd WORD
 
+    SEG programSegment
     MACRO MEMSET
-        SEG programSegment
         clc
         lda <{1}
         sta ptrDstStart

@@ -1,9 +1,4 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
-		processor 6502
-
+    SEG programSegment
 multicolor SUBROUTINE
 
 ; Prepare data struct for MultiColor mode
@@ -43,7 +38,3 @@ multicolorOff:
 	and #$ef
 	sta $d016
 	rts
-
-#if VERBOSE = 1
-    ECHO "multicolor.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

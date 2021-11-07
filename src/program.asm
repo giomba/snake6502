@@ -1,9 +1,10 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
+    SEG zeropageSegment
+    ; Interrupt counter
+counter DS 2
 
-; ENTRY OF PROGRAM
-; ----------------------------------------------------------------------
+    SEG programSegment
+    ; this is the entry point of the program and must stay at this address
+    org $2800
 start:
     ; Clear screen, initialize keyboard, restore interrupts
     jsr $ff81
@@ -253,7 +254,3 @@ checkEndStatus:
 
     ; Go to original system routine
     jmp $ea31
-
-#if VERBOSE = 1
-    ECHO "program.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

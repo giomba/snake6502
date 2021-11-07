@@ -1,7 +1,4 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
+    SEG programSegment
 ; Reset variables for a new level
 ; ----------------------------------------------------------------------
 levelresetvar:
@@ -35,7 +32,3 @@ clearListLoop:
     bne clearListLoop
 
     rts
-
-#if VERBOSE = 1
-    ECHO "levelreset.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif

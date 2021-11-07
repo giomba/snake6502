@@ -1,7 +1,3 @@
-#if VERBOSE = 1
-LASTINIT SET .
-#endif
-
     SEG zeropageSegment
 ; Generic src/dst copy pointers
 srcPointer DS 2
@@ -700,7 +696,3 @@ XScrollInterruptMoveAll SUBROUTINE
 statusMenu SUBROUTINE
     jsr setupXScrollInterrupt
     rts
-
-#if VERBOSE = 1
-    ECHO "intro1.asm @ ",LASTINIT,"len:",(. - LASTINIT)
-#endif
