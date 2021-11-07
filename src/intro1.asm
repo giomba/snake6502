@@ -39,24 +39,23 @@ introreset SUBROUTINE
     rts
 
 statusIntro0 SUBROUTINE
-    lda introYscroll
-
-.enter:
+    ; arrives raster interrupt, move moustache one line below
     inc moustacheLine
 
-    lda $d011
+    lda $d011       ; load current vertical offset from VIC-II
     and #$07
     cmp #$07
-    beq .nextline
-    inc $d011
+    beq .nextline   ; if 7, then it is next text line
+    inc $d011       ; else setup moustache interrupt to trigger next raster line...
     jsr setupMoustacheInterrupt
-    rts
+    rts             ; ...and return: my job here is done
+
 .nextline:
-    lda $d011
+    lda $d011       ; reset raster offset to 0...
     and #$f8
     sta $d011
 
-    ldy #0
+    ldy #0          ; ... clear text line ...
     lda #$80
 .clearLineLoop:
     sta (dstPointer),y
@@ -64,7 +63,7 @@ statusIntro0 SUBROUTINE
     cpy #40
     bne .clearLineLoop
 
-    clc
+    clc             ; ... move dstPointer to next text line ...
     lda dstPointer
     adc #40
     sta dstPointer
@@ -72,7 +71,7 @@ statusIntro0 SUBROUTINE
     adc #0
     sta dstPointer + 1
 
-    ldy #$00
+    ldy #$00        ; ... and copy "GLG Programs" text to next text line
 .glgLoop:
     lda GLGProgramsText,y
     sta (dstPointer),y
@@ -80,11 +79,10 @@ statusIntro0 SUBROUTINE
     cpy #200
     bne .glgLoop
 
-    dec introYscroll
-    beq .next
+    dec introYscroll    ; remember that we are one line below
+    beq .next           ; if we reached the end of the vertical scroll, advance status
 
-    jsr setupMoustacheInterrupt
-
+    jsr setupMoustacheInterrupt ; else just continue with the moustache
     rts
 
 .next:
@@ -106,6 +104,7 @@ setupMoustacheInterrupt SUBROUTINE
     rts
 
 .moustacheInterruptH:
+    ; "higher" moustache interrupt (on the right of the screen)
     ; +36
     dec $d019   ; +42, EOI
     lda #$02    ; +44, color
@@ -139,12 +138,13 @@ setupMoustacheInterrupt SUBROUTINE
     sty $315
     clc
     lda moustacheLine
-    adc #23
+    adc #23     ; "lower" moustache is 23 raster lines below higher one
     sta $d012
 
     jmp $ea31
 
 .moustacheInterruptL:
+    ; "lower" moustache interrupt (on the left of the screen)
     ; +36
     dec $d019   ; +42, EOI
     inc $0800   ; +48, timing
@@ -176,7 +176,7 @@ setupMoustacheInterrupt SUBROUTINE
     inc $0800   ; +18, timing
     sta $d020   ; +22, color
 
-    ldx #<irq
+    ldx #<irq   ; restore main raster interrupt handler
     ldy #>irq
     stx $314
     sty $315
@@ -185,7 +185,7 @@ setupMoustacheInterrupt SUBROUTINE
 
     jmp $ea31
 
-GLGProgramsText:
+GLGProgramsText:    ; fancy PETSCII-looking brand name
     BYTE #$80,#$80,#$80,#$80,#$80,#$80,#$80,#$f0,#$f4,#$80,#$80,#$80,#$f0,#$f4,#$80,#$80,#$f0,#$f4,#$f1,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80
     BYTE #$80,#$80,#$80,#$80,#$80,#$80,#$80,#$f5,#$80,#$80,#$f5,#$80,#$f5,#$80,#$80,#$80,#$f5,#$80,#$f5,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$f1,#$80,#$80,#$80,#$f0,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4
     BYTE #$80,#$80,#$80,#$80,#$80,#$80,#$80,#$f5,#$80,#$f5,#$f5,#$80,#$f5,#$80,#$f5,#$80,#$fd,#$f4,#$f3,#$f0,#$f0,#$f1,#$f0,#$f1,#$f0,#$f0,#$fc,#$f0,#$fb,#$f1,#$f2,#$f1,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80
@@ -193,10 +193,11 @@ GLGProgramsText:
     BYTE #$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$f4,#$fa,#$f4,#$f4,#$f4,#$f4,#$f3,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$f3,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80,#$80
 
 statusIntro1 SUBROUTINE
-    lda $d011
+    ; continue moving moustaches down, up to 4 raster lines (middle of text)
+    lda $d011       
     and #$07
     cmp #$04
-    beq .next
+    beq .next   ; if interrupt is in the middle, don't move it anymore, and...
     inc $d011
     inc moustacheLine
 
@@ -205,9 +206,9 @@ statusIntro1 SUBROUTINE
     rts
 
 .next:
-    jsr setupMoustacheInterrupt
+    jsr setupMoustacheInterrupt ; ... always remember to display moustache, anyhow ...
 
-    lda counter
+    lda counter         ; wait for song synchronization up to interrupt $0080
     cmp #$80
     bne .end
     lda counter + 1
@@ -422,13 +423,15 @@ statusMenuReset SUBROUTINE
     cpy #80
     bne .lastlineColorLoop
 
-    ; Print Game Title
+    ; Print Game Title: big "SNAKE"
+    ; color first
+    MEMSET #$d800, #$02, #200
+    ; actual "text"
     lda #$00
     sta dstPointer
     lda #$04
     sta dstPointer + 1
 
-    ; Print big "SNAKE"
     ldx #<SnakeText
     ldy #>SnakeText
     stx srcPointer
@@ -474,17 +477,24 @@ statusMenuReset SUBROUTINE
     sta dstScreenPointer + 1
     jsr printString
 
-    lda #$f2
+    ; boat-shaped horizontal line (rounded edges toward the top)
+    ; this overwrites the "present" word from the intro
+    lda #$f2        ; 3rd quadrant
     sta $540
-    lda #$f3
+    lda #$f3        ; 4th quadrant
     sta $567
+    lda #$07        ; color for edges
+    sta $540+$d800-$400
+    sta $567+$d800-$400
     ldy #$1
-    lda #$f4
-.cancelPresent:
+.boatLineLoop:
+    lda #$f4        ; horizontal line
     sta $540,y
+    lda #$07
+    sta $540+$d800-$400,y
     iny
     cpy #39
-    bne .cancelPresent
+    bne .boatLineLoop
 
     lda #$05
     sta XCharOffset
@@ -517,6 +527,7 @@ setupXScrollInterrupt SUBROUTINE
     rts
 
 XScrollInterruptH SUBROUTINE
+
     lda $d016
     and #$f8
     ora XScrollOffset

@@ -62,6 +62,7 @@ sidtune:
     SEG.U dataSegment
     org $cd00
     INCLUDE "data.asm"
+    INCLUDE "macro.asm"
 #if VERBOSE = 1
     ECHO "End of Data segment. Space left:",($ce00 - .)
 #endif

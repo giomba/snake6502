@@ -120,7 +120,7 @@ menu SUBROUTINE
     sta status          ; put machine into menu status
     jmp .menu           ; and go there waiting for keypress
 
-; Interrupt Handler
+; Main Raster Interrupt Handler
 ; ----------------------------------------------------------------------
 irq SUBROUTINE
     ; Things that must be done every interrupt (50Hz)
