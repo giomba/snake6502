@@ -90,6 +90,13 @@ menu SUBROUTINE
 
     ; Intro is finished, now it's time to start the proper game
 .intro0end:
+    ; Are you sure? Maybe the demo-intro is not finished, yet
+    ; We do not want to actually start unless the demo is finished,
+    ; otherwise vertical raster line offset may be != 0
+    lda status
+    cmp #ST_MENU
+    bne .menu
+
     ; Set current level pointer to list start
     lda #<levelsList
     sta levelPointer

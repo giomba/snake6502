@@ -33,7 +33,7 @@ introreset SUBROUTINE
     bne .colorLoop
 
     ; first raster interrupt line, for moustaches
-    lda #68+19
+    lda #68+18
     sta moustacheLine
 
     rts
@@ -410,6 +410,10 @@ statusMenuReset SUBROUTINE
     ; Print Game Title: big "SNAKE"
     MEMSET #$d800, #$02, #280       ; color
     MEMCPY #$400, #SnakeText, #280  ; text
+
+    ; Print PETSCII GLG Programs
+    MEMSET #($6a8 + $d800 - $400), #$02, #200   ; color
+    MEMCPY #$6a8, #GLGProgramsText, #200        ; text
 
     ; Print website
     lda #<intro2string          ; lsb of string address
